@@ -1,0 +1,44 @@
+<?php
+
+/*
+|--------------------------------------------------------------------------
+| Application Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register all of the routes for an application.
+| It's a breeze. Simply tell Laravel the URIs it should respond to
+| and give it the controller to call when that URI is requested.
+|
+*/
+
+Route::get('/', 'WelcomeController@index');
+
+Route::get('dashboard', 'Dashboard\DashboardController@index');
+Route::get('home', 'Dashboard\DashboardController@index');
+
+Route::get('profile/password', 'Profile\ProfileController@password');
+Route::post('profile/changePassword','Profile\ProfileController@changePassword');
+Route::get('profile/confirm/{confirmationCode}', ['as' => 'profile/confirm', 'uses' => 'Profile\ProfileController@confirm']);
+Route::get('account/confirm-email/id/{confirmationCode}', ['as' => 'profile/confirm', 'uses' => 'Profile\ProfileController@confirm']); //mak backwards compatible with old confirmation link
+Route::resource('profile', 'Profile\ProfileController'); //this is created as a resource for future use when ...
+//the fleet admin is implemented and there is a need to create new user profiles with access control
+
+Route::get('flights', ['as'   => 'flights', 'uses' => 'Flights\FlightController@index']);
+Route::get('flights/event/{exceedance}', ['as'   => 'flights/event', 'uses' => 'Flights\FlightController@index']); //technically this is equivalent to the above route, however its a nice custom URL for the exceedances //this formerly called the exceedance method but the code was refactored: 'uses' => 'Flights\FlightController@exceedance'
+Route::get('flights/trend', ['as'   => 'flights/trend', 'uses' => 'Flights\FlightController@trend']);
+Route::get('flights/chart/{flight}', ['as' => 'flights/chart', 'uses' => 'Flights\FlightController@chart']);
+Route::get('flights/download/{flight}/{format}/{exceedance?}/{duration?}', ['as' => 'flights/download', 'uses' => 'Flights\FlightController@download'], function($exceedance = null){
+    return $exceedance; //$exceedance is an optional parameter than can be null....i dont think this logic is working in the controller
+});
+Route::get('flights/archive/{flight}', ['as' => 'flights/archive', 'uses' => 'Flights\FlightController@archive']);
+Route::resource('flights', 'Flights\FlightController', ['only' => ['edit', 'create', 'update']]); //resource created for CRUD manipulation of flights
+
+Route::get('import', 'Import\ImportController@index');
+Route::get('import/status', 'Import\ImportController@status');
+Route::get('import/upload', 'Import\ImportController@upload');
+Route::resource('import', 'Import\ImportController', ['only' => ['store', 'create']]);
+
+Route::controllers([
+	'auth' => 'Auth\AuthController',
+	'password' => 'Auth\PasswordController',
+]);
