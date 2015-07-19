@@ -12,6 +12,7 @@
 */
 
 Route::get('/', 'WelcomeController@index');
+Route::get('/account', 'WelcomeController@index');
 
 Route::get('dashboard', 'Dashboard\DashboardController@index');
 Route::get('home', 'Dashboard\DashboardController@index');
