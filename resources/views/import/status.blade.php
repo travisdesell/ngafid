@@ -42,7 +42,7 @@
                                             <td class="col-md-2" data-title="Aircraft">{{$flight->aircraft}}</td>
                                             <td class="col-md-2" data-title="Date Uploaded">{{$flight->uploaded}}</td>
                                             <td class="col-md-2" data-title="Import Submitted">{{$flight->submitted}}</td>
-                                            <td class="col-md-2" data-title="Import Status">{{$flight->status}}</td>
+                                            <td class="col-md-2" data-title="Import Status">{{($flight->status == 'Failed') ? $flight->status . '. ' . $flight->notes : $flight->status }}</td>
                                         </tr>
                                     @endforeach
                                     </tbody>

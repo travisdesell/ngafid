@@ -28,7 +28,8 @@ class FileUpload extends Model{
                             WHEN (uploaded_file.total_num_of_data/uploaded_file.imported_num_of_data = 1 AND error = 0 AND is_submitted = 1) THEN 'Imported'
                             WHEN (error = 0 AND is_submitted = 1) THEN 'Pending'
                             ELSE 'Failed'
-                        END AS 'status'")
+                        END AS 'status'"),
+            \DB::raw("uploaded_file.import_notes AS 'notes'")
         )
         ->leftJoin(\DB::raw('fdm_test.organization o'), 'o.id', '=', 'uploaded_file.fleet_id')
         ->leftJoin(\DB::raw('fdm_test.flight_id f'), 'f.id', '=', 'uploaded_file.flight_id')
