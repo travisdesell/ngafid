@@ -50,12 +50,13 @@
                                 </a>
                             </span>
                             <br>
-                            <br>
-                            <span class="pull-left col-md-12"><b>GAARD App Screenshotssss</b></span>
-                            <div class="col-md-12">
-                                <div class="col-md-4"><img class="img-responsive" src="{{ asset('images/gaardImg1.png') }}" height="75px"/></div>
-                                <div class="col-md-4"><img class="img-responsive" src="{{ asset('images/gaardImg2.png') }}" height="75px"/></div>
-                                <div class="col-md-4"><img class="img-responsive" src="{{ asset('images/gaardImg3.png') }}" height="75px"/></div>
+                            <div class="row">
+                                <span class="pull-left col-md-12"><b>GAARD App Screenshots</b></span>
+                                <div class="col-xs-12">
+                                    <div class="col-xs-4"><img class="img-responsive" src="{{ asset('images/gaardImg1.png') }}" height="75"/></div>
+                                    <div class="col-xs-4"><img class="img-responsive" src="{{ asset('images/gaardImg2.png') }}" height="75"/></div>
+                                    <div class="col-xs-4"><img class="img-responsive" src="{{ asset('images/gaardImg3.png') }}" height="75"/></div>
+                                </div>
                             </div>
                         </p>
                     </div>
