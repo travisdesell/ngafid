@@ -22,6 +22,7 @@
                                 <li>Pilots in safety programs are less likely to be involved in an accident (GAO 13‐36, pg. 13).</li>
                                 <li>Attitude data can be collected, giving you enhanced feedback to improve your skills.</li>
                                 <li>Your data can help the whole GA community.</li>
+                                <li><strong><em>Your data will not be used for enforcement purposes.</em></strong></li>
                             </ul>
                         </p>
                         <p>

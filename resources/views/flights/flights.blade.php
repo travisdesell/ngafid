@@ -100,6 +100,15 @@
                             </div>
                         </div>
                         <div class="col-md-3">
+                            @if(Auth::user()->org_id == 1 || Auth::user()->org_id == 3)
+                                <div class="form-group">
+                                    <label class="col-xs-6 control-label">Flight ID</label>
+                                    <div class="col-xs-6">
+                                        {!! Form::text('flightID', $selected['flightID'], ["class" => "form-control"]) !!}
+                                    </div>
+                                </div>
+                            @endif
+
                             <div class="form-group">
                                 <label class="col-xs-6 control-label">No. Flights <i><small>(per page)</small></i></label>
                                 <div class="col-xs-6">

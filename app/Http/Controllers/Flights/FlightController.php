@@ -54,6 +54,7 @@ class FlightController extends Controller {
         $sort       = \Request::query('sort');
         $event      = \Request::route('exceedance');
         $duration   = \Request::query('duration');
+        $flightID   = \Request::query('flightID');
         $action     = 'flights';
         $archived   = ''; //show all flights that are not archived
         $pageName   = 'All Flights';
@@ -79,6 +80,10 @@ class FlightController extends Controller {
 
         if($duration == ''){
             $duration = '00:00';
+        }
+
+        if(!is_numeric($flightID)){
+            $flightID = '';
         }
 
         $column = '';
@@ -145,7 +150,7 @@ class FlightController extends Controller {
 
         $flightIdTable = new FlightID();
 
-        $flights = $flightIdTable->flightDetails($fleetID, $startDate, $endDate, $archived, $sort, $column, $duration)->paginate($this->perPage);
+        $flights = $flightIdTable->flightDetails($fleetID, $startDate, $endDate, $archived, $sort, $column, $duration, $flightID)->paginate($this->perPage);
 
         $selected = array();
         $selected['startDate']   = $startDate;
@@ -155,6 +160,7 @@ class FlightController extends Controller {
         $selected['event']       = $event;
         $selected['duration']    = $duration;
         $selected['perPage']     = $this->perPage;
+        $selected['flightID']     = $flightID;
 
         return view('flights.flights')->with(['data' => $flights, 'selected' => $selected, 'action' => $action, 'pageName' => $pageName]);
     }

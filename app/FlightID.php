@@ -32,7 +32,7 @@ class FlightID extends Model {
         return $this->hasMany('NGAFID\Main', 'flight');
     }
 
-    public function scopeFlightDetails($query, $fleet, $startDate = null, $endDate = null, $archived = '', $sort = null, $column = null, $duration = '00:00')
+    public function scopeFlightDetails($query, $fleet, $startDate = null, $endDate = null, $archived = '', $sort = null, $column = null, $duration = '00:00', $flightID = '')
     {
         /*return $query->select('flight_id.id', 'n_number', 'date', 'time', 'origin', 'destination', 'duration',
             'aircraft name', 'year', 'make', 'model', \DB::raw("COALESCE(num_exceedances, 0) num_events"))
@@ -72,6 +72,10 @@ class FlightID extends Model {
 
         if(($duration != '00:00') && ($sort == 5)){
             $query->where(\DB::raw("TIME_FORMAT(flight_id.`duration`, '%H:%i')"), '>=', \DB::raw("'" . $duration . "'") );
+        }
+
+        if($flightID != '' && $flightID > 0){
+            $query->where(\DB::raw('flight_id.`id`'), '=', $flightID );
         }
 
         switch($sort)
