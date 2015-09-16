@@ -28,6 +28,8 @@ Route::get('flights', ['as'   => 'flights', 'uses' => 'Flights\FlightController@
 Route::get('flights/event/{exceedance}', ['as'   => 'flights/event', 'uses' => 'Flights\FlightController@index']); //technically this is equivalent to the above route, however its a nice custom URL for the exceedances //this formerly called the exceedance method but the code was refactored: 'uses' => 'Flights\FlightController@exceedance'
 Route::get('flights/trend', ['as'   => 'flights/trend', 'uses' => 'Flights\FlightController@trend']);
 Route::get('flights/chart/{flight}', ['as' => 'flights/chart', 'uses' => 'Flights\FlightController@chart']);
+Route::get('flights/replay/{flight}', ['as' => 'flights/replay', 'uses' => 'Flights\FlightController@replay']);
+Route::get('flights/load/{flight}', ['as' => 'flights/load', 'uses' => 'Flights\FlightController@loadReplay']);
 Route::get('flights/download/{flight}/{format}/{exceedance?}/{duration?}', ['as' => 'flights/download', 'uses' => 'Flights\FlightController@download'], function($exceedance = null){
     return $exceedance; //$exceedance is an optional parameter than can be null....i dont think this logic is working in the controller
 });

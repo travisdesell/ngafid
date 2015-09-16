@@ -175,7 +175,7 @@
                                                     @endif
                                                 </ul>
                                             </div>
-                                            <a href="#" class="glyphicon glyphicon-plane" title="Replay flight"></a>
+                                            <a href="#" id="replayFlight{{$flight['id']}}" data-link="{{URL::route('flights/load', $flight['id']) }}" class="glyphicon glyphicon-plane" title="Replay flight"></a>
                                         </td>
                                     </tr>
                                     <tr>
@@ -188,7 +188,7 @@
                                                 </div>
                                                 <div class="col-md-3 col-md-offset-1">
                                                     <b>View Charts:</b> <a href="{{URL::route('flights/chart', $flight['id']) }}" class="glyphicon glyphicon-stats"></a><br>
-                                                    <b>Replay Flight:</b> replay in browser
+                                                    <b>Replay Flight:</b> <a href="#" id="replayFlight{{$flight['id']}}" data-link="{{URL::route('flights/load', $flight['id']) }}" class="glyphicon glyphicon-plane" title="Replay flight"></a>
                                                 </div>
                                                 <div class="col-md-3 col-md-offset-1">
                                                     <b>No. Exceedance:</b> {{$flight['num_events']}}<br>
@@ -460,5 +460,43 @@
             str = str.toString();
             return str.length < max ? pad("0" + str, max) : str;
         }
+
+        $("a[id^=replayFlight]").click(function(){
+            showProgress();
+            jQuery.noConflict();
+            var url = $(this).attr("data-link");
+            var CSRF_TOKEN = $('input[name="_token"]').val();
+
+            $.ajax({
+                url: url,
+                type:"GET",
+                data: {_token: CSRF_TOKEN},
+
+                success: function(data) {
+                    hideProgress();
+
+                    //show message in modal
+                    if(data.hasOwnProperty('data')) {
+                        if (data.data.found == false) {
+                            $('#downloadStatus .modal-body').html('<p>There was a problem retrieving the replay for this flight due to invalid data.</p>');
+                            $('#downloadStatus').modal('show');
+                        }
+                        if (data.data.found == true){
+                            //alert(url);
+                            var replayLink = url.replace("load", "replay");
+                            //alert(replayLink);
+                            window.open(replayLink, "popupWindow");
+                        }
+                    }
+
+                },
+                error:function(){
+                    hideProgress();
+                    $('#downloadStatus .modal-body').html('<p>There was a problem retrieving the replay for this flight due to invalid data.</p>');
+                    $('#downloadStatus').modal('show');
+                }
+            });
+
+        });
     </script>
 @endsection

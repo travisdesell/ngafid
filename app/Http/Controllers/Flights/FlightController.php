@@ -830,4 +830,118 @@ class FlightController extends Controller {
         return \Redirect::back(); //redirect('flights');
     }
 
+    public function loadReplay()
+    {
+        $flight         = \Request::route('flight');
+        $validFlight    = $this->validateFlight();
+        $path           = 'tmp/';
+        $filename       = $path . $flight . '.czml';
+
+        if($validFlight) {
+            $flightStart = $validFlight['date'] . 'T' . $validFlight['time'] . 'Z'; //ERR: NGAFID TIME NOT ALWAYS IN UTC
+            $flightName  = $flight;
+            //$flightName .= ' ' . $flight;
+
+            $duration    = ($validFlight['duration'] ? $validFlight['duration'] : '00:00:00');
+            $duration    = explode(':', $duration);
+
+            $flightEnd  = date("H:i:s", strtotime("+ $duration[0] hours $duration[1] minutes $duration[2] seconds ",strtotime($validFlight['date'] . ' ' . $validFlight['time'])));
+            $flightEnd  = $validFlight['date'] . 'T' . $flightEnd . 'Z';
+
+            $nNumber = ($validFlight['n_number'] ? $validFlight['n_number'] : 'N/A');
+            $origin  = ($validFlight['origin'] ? $validFlight['origin'] : 'N/A');
+            $destination = ($validFlight['destination'] ? $validFlight['destination'] : 'N/A');
+
+            $description  = "Call Sign " . $nNumber . "<br>";
+            $description .= "Duration " . $validFlight['duration'] . "<br>";
+            $description .= "Route " . $origin . " => " . $destination;
+
+
+            $header = <<<HDR
+    [{
+        "id":"document",
+        "name":"Replay",
+        "version":"1.0",
+        "clock":{
+            "interval":"{$flightStart}/{$flightEnd}",
+            "currentTime":"{$flightStart}",
+            "multiplier":5,
+            "range":"LOOP_STOP",
+            "step":"SYSTEM_CLOCK_MULTIPLIER"
+            }
+        },
+        {
+        "id":"FlightTrack/Replay",
+        "name": "{$flightName}",
+        "availability":"{$flightStart}/{$flightEnd}",
+        "description":"{$description}",
+        "path":{
+            "show":false,
+            "width":2,
+            "material":{
+                "polylineOutline" : {
+                "outlineWidth" : 1,
+                "color" : {"rgba":[255,0,255,255]},
+                "outlineColor" : {"rgba":[0,0,0,255]}
+                }
+            }
+        },
+HDR;
+
+            \File::put($filename, $header);
+
+            $contents = '"position":{"epoch":"' . $flightStart . '","cartographicDegrees":[';
+
+            $offset     = 0;
+            $rowCtr = 0;
+            do{
+                $result  = \DB::select('CALL sp_GetFlightDetails(?, ?, ?, ?)', array($flight,  0, 0, $offset));
+                foreach($result as $row)
+                {
+                    if(isset($row->NotFound))
+                    {
+                        $found = false;
+                        \File::delete($filename);
+
+                        //return view('errors/404');
+                        $data = ['found' => $found];
+                        return \Response::json(['success' => true,'data' => $data]);
+                    }
+                    else{
+                        $found = true;
+                    }
+
+                    if($rowCtr == 0) {
+                        $contents .=  floor($row->time) . ',' . $row->longitude  . ',' . $row->latitude  . ',' . ($row->radio_altitude_derived < 5 ? 5 : $row->radio_altitude_derived);
+                    }
+                    else{
+                        $contents .=  ',' . "\n" . floor($row->time) . ',' . $row->longitude  . ',' . $row->latitude  . ',' . ($row->radio_altitude_derived < 5 ? 5 : $row->radio_altitude_derived);
+                    }
+                    $rowCtr += 1;
+                }
+
+                \File::append($filename, $contents);
+                $contents = '';
+                $offset += 1000;
+
+            }while($result);
+
+            if($found) {
+                \File::append($filename, ']}}]');
+            }
+
+            return \Response::json(['success' => true,'data' => ['found' => true]]);
+
+        }
+        else{
+            return view('errors/404');
+        }
+    }
+
+    public function replay()
+    {
+        $flight  = \Request::route('flight');
+        return view('flights/replay')->with(['flight' => $flight]);
+    }
+
 }
