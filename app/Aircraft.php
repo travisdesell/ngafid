@@ -42,7 +42,7 @@ class Aircraft extends Model {
                 INNER JOIN queries q
                   ON q.id = qs.query_id
                 INNER JOIN query_fleet_sums qf
-                  ON qf.fleet_id = qs.fleet_id AND qf.`date` = qs.`date`
+                  ON qf.fleet_id = qs.fleet_id AND qf.`date` = qs.`date` AND qf.`aircraft_id` = qs.`aircraft_id`
                 WHERE qs.fleet_id = {$fleetID}");
 
         if($selectedEvent != '')
