@@ -351,6 +351,7 @@ class FlightController extends Controller {
             $aircraftData[$aircraft['id']] = $aircraft['aircraft name'] . ' - ' . $aircraft['year'] . ' ' . $aircraft['make'] . $aircraft['model'];
         }
 
+        asort($events);
 
         $data = array(
             'events'    => $events,
