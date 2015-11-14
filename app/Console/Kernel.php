@@ -30,7 +30,7 @@ class Kernel extends ConsoleKernel {
         $count = $result[0]->count;
 
         if($count > 0){
-            $schedule->command('queue:work')->everyThirtyMinutes();//->withoutOverlapping();
+            $schedule->command('queue:work')->hourly();//->withoutOverlapping();
         }
 	}
 
