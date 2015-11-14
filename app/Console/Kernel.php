@@ -31,6 +31,7 @@ class Kernel extends ConsoleKernel {
 
         for($i = 0; $i < $count; $i++){
             $schedule->command('queue:work');//->everyFiveMinutes();
+            sleep(120);
         }
 	}
 
