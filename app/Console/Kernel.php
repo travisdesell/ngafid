@@ -22,8 +22,16 @@ class Kernel extends ConsoleKernel {
 	 */
 	protected function schedule(Schedule $schedule)
 	{
-		$schedule->command('inspire')
-				 ->hourly();
+		//$schedule->command('inspire')
+		//		 ->hourly();
+
+        //automatically handle web import when called by CRON job
+        $result = \DB::select("SELECT count(`id`) AS 'count' FROM fdmdm.`jobs`");
+        $count = $result[0]->count;
+
+        for($i = 0; $i < $count; $i++){
+            $schedule->command('queue:work');//->everyFiveMinutes();
+        }
 	}
 
 }
