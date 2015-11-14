@@ -30,7 +30,7 @@ class Kernel extends ConsoleKernel {
         $count = $result[0]->count;
 
         for($i = 0; $i < $count; $i++){
-            $schedule->command('queue:work')->withoutOverlapping();//->everyFiveMinutes();
+            $schedule->command('queue:work')->cron('*/2 * * * * *')->withoutOverlapping();
         }
 	}
 
