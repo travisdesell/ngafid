@@ -25,12 +25,12 @@ class Kernel extends ConsoleKernel {
 		//$schedule->command('inspire')
 		//		 ->hourly();
 
-        //automatically handle web import when called by CRON job
+        //automatically handle web import when called by the CRON job
         $result = \DB::select("SELECT count(`id`) AS 'count' FROM fdmdm.`jobs`");
         $count = $result[0]->count;
 
-        for($i = 0; $i < $count; $i++){
-            $schedule->command('queue:work')->cron('*/2 * * * * *')->withoutOverlapping();
+        if($count > 0){
+            $schedule->command('queue:work')->withoutOverlapping();
         }
 	}
 
