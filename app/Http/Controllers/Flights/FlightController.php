@@ -731,7 +731,7 @@ class FlightController extends Controller {
 
                         case 'data':
                             $contents .= '<tr class="col-md-12 ' . ($row->event == 1 ? ' danger ' : '') . '">';
-                            $contents .= '<td class="col-md-1 text-center">' . floor($row->time)         . '</td>';
+                            $contents .= '<td class="col-md-1 text-center">' . gmdate("H:i:s", floor($row->time))        . '</td>';
                             $contents .= '<td class="col-md-2 text-center">' . $row->msl_altitude        . '</td>';
                             $contents .= '<td class="col-md-2 text-center">' . $row->indicated_airspeed  . '</td>';
                             $contents .= '<td class="col-md-1 text-center">' . $row->vertical_airspeed   . '</td>';
