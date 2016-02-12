@@ -47,7 +47,7 @@
                                 For Android devices, search for GAARD at Google Play or click here to <br>
                                 <a href="http://tinyurl.com/gaardapp" target="_blank">download the free app</a><br>
                                 <a href="https://play.google.com/store/apps/details?id=org.mitre.asgaard.beta" target="_blank">
-                                    <img alt="download the GAARD App" src="https://developer.android.com/images/brand/en_app_rgb_wo_45.png" style="height:40px" />
+                                    <img alt="download the GAARD App" src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" style="height:40px" />
                                 </a>
                             </span>
                             <br>
