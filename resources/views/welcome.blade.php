@@ -34,10 +34,10 @@
                         </p>
                         <p>
                             <span class="text-info"><b>How can I participate?</b></span><br>
-                            You can participate in two ways. (1) Data can come from either your on-board avionics (for example, a G1000 or data recorder) or (2) using a newly developed mobile app — on your smart phone or tablet. To sign up for an account, <a href="http://fdm.und.edu/auth/register">click here</a>.<br>
+                            You can participate in two ways. (1) Data can come from either your on-board avionics (for example, a G1000 or data recorder) or (2) using a newly developed mobile app — on your smart phone or tablet. <br>
                         </p>
                         <p>
-                            <span class="text-info"><b>Download the GAARD (GA Recording Device) App for IOS and Android below</b></span>
+                            <span class="text-info pull-left col-md-12"><b>To sign up for an account, <a class="text-warning" href="{{ url('/auth/register') }}">click here</a> or download the GAARD (GA Recording Device) App for IOS and Android below!</b></span>
                             <span class="col-xs-6">
                                 For iOS devices, search for GAARD at the App Store or click here to <br>
                                 <a href="https://itunes.apple.com/us/app/general‐aviation‐airborne/id929718718?mt=8" target="_blank">download the free app</a><br>
