@@ -1,4 +1,6 @@
 <?php namespace NGAFID\Http\Controllers\Flights;
+ini_set("memory_limit","10240M");
+ini_set('max_execution_time', 300); //5 mins
 
 use NGAFID\Http\Controllers\Controller;
 use Illuminate\Pagination\Paginator;
@@ -408,36 +410,36 @@ class FlightController extends Controller {
             {
                 //foreach ($parameters as $param)
                 {
-                    $columns = "AddTime('" . $startTime . "', COALESCE(SEC_TO_TIME(time/1000), 0)) AS 'time'";
+                    $columns = "AddTime('" . $startTime . "', COALESCE(SEC_TO_TIME(time/1000), 0)) AS time_sec";
 
                     switch ($param) {
                         case 1:
-                            $columns .= ', indicated_airspeed';
+                            $columns .= ', AVG(indicated_airspeed) AS indicated_airspeed';
                             $seriesName = 'Airspeed';
                             break;
 
                         case 2:
-                            $columns .= ', msl_altitude';
+                            $columns .= ', AVG(NULLIF(msl_altitude, 0)) AS msl_altitude';
                             $seriesName = 'MSL Altitude';
                             break;
 
                         case 3:
-                            $columns .= ', eng_1_rpm';
+                            $columns .= ', AVG(eng_1_rpm) AS eng_1_rpm';
                             $seriesName = 'Engine RPM';
                             break;
 
                         case 4:
-                            $columns .= ', pitch_attitude';
+                            $columns .= ', AVG(pitch_attitude) AS pitch_attitude';
                             $seriesName = 'Pitch';
                             break;
 
                         case 5:
-                            $columns .= ', roll_attitude';
+                            $columns .= ', AVG(roll_attitude) AS roll_attitude';
                             $seriesName = 'Roll';
                             break;
 
                         case 6:
-                            $columns .= ', vertical_airspeed';
+                            $columns .= ', AVG(vertical_airspeed) AS vertical_airspeed';
                             $seriesName = 'Vertical Speed';
                             break;
                     }
@@ -446,7 +448,7 @@ class FlightController extends Controller {
                     $result  = $mainTable->flightParameters($columns, $selectedFlight)->get()->toArray();
 
                     if($result != '') {
-                        $time    = $this->array_column($result, 'time');
+                        $time    = $this->array_column($result, 'time_sec');
 
                         foreach($time as $key => $val) {
                             $time[$key] = $val; //$validFlight->date  . ' ' .  //'new Date(' . strtotime($validFlight->date  . ' ' . $val ) . '*1000)';
