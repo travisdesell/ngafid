@@ -439,4 +439,19 @@ class DashboardController extends Controller {
 
 	}
 
+    public function faq()
+    {
+        $userInfo   = \DB::select( \DB::raw("SELECT COUNT(`id`) AS 'total', user_type AS 'type' FROM user GROUP BY user_type") );
+
+        $fleetInfo  = \DB::select( \DB::raw("SELECT COUNT(`id`) AS 'total' FROM organization WHERE org_type = 'F'") );
+
+        $flightInfo = \DB::select( \DB::raw("SELECT o.org_type AS 'type', count(f.id) as 'uploads',
+                    COALESCE(concat(floor(SUM( TIME_TO_SEC( f.`duration` ))/3600),\":\",LPAD(floor(SUM( TIME_TO_SEC( f.`duration` ))/60)%60, 2, 0),\":\",LPAD(SUM( TIME_TO_SEC( f.`duration` ))%60, 2, 0)), 'N/A') as 'hours'
+                    FROM flight_id f LEFT OUTER JOIN organization o ON o.id = f.fleet_id
+                    WHERE o.`org_type` IN ('F', 'O') GROUP BY o.`org_type`") );
+
+
+        return view('dashboard.faq')->with(['userInfo' => $userInfo, 'fleetInfo' => $fleetInfo, 'flightInfo' => $flightInfo]);
+    }
+
 }

@@ -16,6 +16,7 @@ Route::get('/account', 'WelcomeController@index');
 
 Route::get('dashboard', 'Dashboard\DashboardController@index');
 Route::get('home', 'Dashboard\DashboardController@index');
+Route::get('faq', 'Dashboard\DashboardController@faq');
 
 Route::get('profile/password', 'Profile\ProfileController@password');
 Route::post('profile/changePassword','Profile\ProfileController@changePassword');
@@ -40,6 +41,11 @@ Route::get('import', 'Import\ImportController@index');
 Route::get('import/status', 'Import\ImportController@status');
 Route::get('import/upload', 'Import\ImportController@upload');
 Route::resource('import', 'Import\ImportController', ['only' => ['store', 'create']]);
+
+Route::get('approach', 'StabilizedApproach\StabilizedApproachController@index');
+Route::get('approach/index/', 'StabilizedApproach\StabilizedApproachController@index');
+Route::get('approach/analysis/', 'StabilizedApproach\StabilizedApproachController@analysis');
+Route::get('approach/chart/', 'StabilizedApproach\StabilizedApproachController@chart');
 
 Route::controllers([
 	'auth' => 'Auth\AuthController',

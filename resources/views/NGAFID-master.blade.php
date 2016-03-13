@@ -49,7 +49,7 @@
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">{{ Auth::user()->email }} <span class="glyphicon glyphicon-cog"></span></a>
 							<ul class="dropdown-menu" role="menu">
                                 <li><a href="{{ url('/profile') }}">My Account</a></li>
-                                <li><a href="#">FAQ's</a></li>
+                                <li><a href="{{ url('/faq') }}">FAQ's</a></li>
                                 <li><a href="mailto:jhiggins@aero.und.edu">Contact Us</a></li>
 								<li><a href="{{ url('/auth/logout') }}">Logout</a></li>
 							</ul>
