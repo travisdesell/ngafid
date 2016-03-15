@@ -46,6 +46,8 @@ Route::get('approach', 'StabilizedApproach\StabilizedApproachController@index');
 Route::get('approach/index/', 'StabilizedApproach\StabilizedApproachController@index');
 Route::get('approach/analysis/', 'StabilizedApproach\StabilizedApproachController@analysis');
 Route::get('approach/chart/', 'StabilizedApproach\StabilizedApproachController@chart');
+Route::get('approach/airports/', 'StabilizedApproach\StabilizedApproachController@airports');
+Route::get('approach/runways/', 'StabilizedApproach\StabilizedApproachController@runways');
 
 Route::controllers([
 	'auth' => 'Auth\AuthController',

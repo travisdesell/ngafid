@@ -43,3 +43,12 @@
         <li><a href="{{ url('import/status') }}">Import Status/History</a></li>
     </ul>
 </li>
+@if(Auth::user()->org_id == 1)
+<li  class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Approach<span class="caret"></span></a>
+    <ul class="dropdown-menu" role="menu">
+        <!--<li><a href="{{ url('approach/index') }}">Info...</a></li>-->
+        <li><a href="{{ url('approach/analysis') }}">Analysis</a></li>
+    </ul>
+</li>
+@endif
