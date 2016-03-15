@@ -55,7 +55,7 @@ class StabilizedApproachController extends Controller{
                         $showYAxis = true;
                         $yLabel    = 'Difference from Ideal Height (ft)';
                         $xLabel    = 'Difference from Ideal Speed (kts)';
-                        $subTitle  = '<span style="font-size: 11pt;font-weight:bold;">High/Low - Fast/Slow</span> <br><br><em><span style="color: rgb(255, 204, 0); weight:bold;">yellow</span>: > 5Ft/5Kts (from ideal Height/Speed)</em> <br> <em><span style="color: rgb(223, 83, 83); weight:bold;">red</span>: > 10Ft/10Kts (from ideal Height/Speed)</em>';
+                        $subTitle  = '<span style="font-size: 11pt;font-weight:bold;">High/Low - Fast/Slow</span> <br><br><em><span style="color: rgb(255, 204, 0); weight:bold;">yellow</span>: > 5Ft/5Kts (from ideal height/speed)</em> <br> <em><span style="color: rgb(223, 83, 83); weight:bold;">red</span>: > 10Ft/10Kts (from ideal height/speed)</em>';
                         $legend    = false;
                         $quad      = true;
                 break;
