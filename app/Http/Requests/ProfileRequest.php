@@ -29,6 +29,7 @@ class ProfileRequest extends Request {
             'lastname'                  => 'required|min:3|max:75',
             'address'                   => 'max:100',
             'city'                      => 'max:45',
+            'country'                   => 'max:45',
             'state'                     => 'max:45',
             'zip_code'                  => 'regex:/^\d{5}(?:[-\s]\d{4})?$/',//'numeric|digits:5',
             'phone'                     => 'regex:/^([0-9\s\-\+\(\)]*)$/',//'numeric|digits_between:10,12',

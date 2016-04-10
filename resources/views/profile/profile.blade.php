@@ -66,10 +66,19 @@
                             </div>
 
                             <div class="form-group">
+                                <label class="col-md-4 control-label">Country</label>
+                                <div class="col-md-6">
+                                    @include('partials.countries-macro')
+                                    {!! Form::countrySelect('country', (Input::old('country') ? Input::old('country') : $data['fleetInfo']['country']), ["class" => "form-control", "id" => "country"]) !!}
+                                </div>
+                            </div>
+
+                            <div class="form-group">
                                 <label class="col-md-4 control-label">State</label>
                                 <div class="col-md-6">
                                     @include('partials.usa-states-macro')
-                                    {!! Form::stateSelect('state', (Input::old('state') ? Input::old('state') : $data['fleetInfo']['state']), ["class" => "form-control"]) !!}
+                                    {!! Form::stateSelect('states', (Input::old('states') ? Input::old('states') : $data['fleetInfo']['state']), ["class" => "form-control", "id" => "states"]) !!}
+                                    <input type="hidden" name="state" value=""/>
                                 </div>
                             </div>
 
@@ -108,4 +117,43 @@
 		</div>
 	</div>
 </div>
+@endsection
+
+
+@section('jsScripts')
+    <script type="text/javascript">
+        $( document ).ready(function() {
+            var selected = $('#country').val();
+            checkStates(selected);
+        });
+
+        $(document).on('change','#country',function(){
+            var selected = $(this).val();
+            checkStates(selected);
+        });
+
+        $(document).on('change','#states',function(){
+            var selected = $(this).val();
+            $('input[name="state"]').val(selected);
+        });
+
+        function checkStates(selected) {
+
+            if(selected !== 'US' && selected !== ''){
+                $('input[name="zip_code"]').val('');
+                $('input[name="state"]').val('');
+                $("#states").val('');
+
+                $('input[name="zip_code"]').attr('readonly', true);
+                $('input[name="zip_code"]').css('background-color' , '#EBEBE4');
+                $('#states').attr('disabled', 'disabled');
+            }
+            else{
+                $('input[name="zip_code"]').attr('readonly', false);
+                $('input[name="zip_code"]').css('background-color' , '#FFFFFF');
+                $('#states').removeAttr('disabled');
+            }
+
+        }
+    </script>
 @endsection

@@ -82,6 +82,7 @@ class ProfileController extends Controller {
         $fleetData = array(
             'address'   =>  $formfields['address'],
             'city'      =>  $formfields['city'],
+            'country'   =>  $formfields['country'],
             'state'     =>  $formfields['state'],
             'zip_code'  =>  $formfields['zip_code'],
             'phone'     =>  $formfields['phone'],
