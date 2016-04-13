@@ -116,7 +116,24 @@
         var numSeries = 0;
         var parentSubTitle = '';
 
+        Highcharts.setOptions({
+            lang: {
+                drillUpText: '◁ Back'
+            },
+            drilldown:{
+                animation: false
+            },
+            plotOptions: {
+                series: {
+                    animation: false
+                }
+            }
+        });
+
+        Highcharts.Tick.prototype.drillable = function () {};
+
         $("document").ready(function(){
+
 
             $("#saTool").submit(function(e){
                 e.preventDefault();
@@ -127,7 +144,8 @@
                 var CSRF_TOKEN = $('input[name="_token"]').val();
                 var url = $("#display").attr('data-link');
 
-                if (chart.drilldownLevels !== undefined && chart.drilldownLevels > 0) {
+
+                if (chart.drilldownLevels !== undefined && chart.drilldownLevels.length > 0) {
                     chart.drillUp();
                 }
 
@@ -163,7 +181,7 @@
                                     marker: {symbol: data.data.series[i].symbol},
                                     data: data.data.series[i].data,
                                     visible: data.data.series[i].visible
-                                });
+                                }, false);
                             }
 
                             chart.hideLoading();
@@ -208,7 +226,7 @@
                                     $(chart.series[2].legendItem.element).trigger('click'); //hide maximum on load
                                 }
                             }
-                            chart.redraw();
+                            //chart.redraw();
                         }
                         else{
                             chart.hideLoading();
@@ -220,16 +238,9 @@
 
         });
 
-        Highcharts.setOptions({
-            lang: {
-                drillUpText: 'Back'
-            }
-        });
-
-        Highcharts.Tick.prototype.drillable = function () {};
-
         var parentY = '';
         var parentX = '';
+        var upCtr = 0;
 
 
         $("#chart").highcharts({
@@ -237,6 +248,7 @@
                 renderTo: 'chart',
                 type: 'scatter',
                 zoomType: 'xy',
+                animation:false,
                 events: {
                     drilldown: function(e) {
                         //if (!e.seriesOptions) {
@@ -244,6 +256,7 @@
                             var chart = this;
                             parentY = chart.options.yAxis[0].title.text;
                             parentX = chart.options.xAxis[0].title.text;
+                            upCtr = 0;
 
                             chart.showLoading('Loading ...');
 
@@ -276,7 +289,7 @@
                                      //chart.addSingleSeriesAsDrilldown(e.point, data.data.result[0]);
                                      chart.hideLoading();
 
-                                     chart.xAxis[0].setCategories(data.data.time);
+                                     chart.xAxis[0].setCategories(data.data.time, false);
 
                                      chart.yAxis[0].update({
                                          title: {
@@ -298,47 +311,51 @@
                              }
                              },"json");
 
-
+                            //chart.redraw();
                         //}
                     },
                     drillup: function(e) {
-                        var chart = this;
-                        //this.subTitle({ text: 'chart 1' });
 
-                        this.yAxis[0].update({
-                            title: {
-                                text: parentY
-                            }
-                        });
-                        this.xAxis[0].update({
-                            title: {
-                                text: parentX
-                            }
-                        });
+                        if(upCtr == numSeries) { //flag...drillup event being fired multiple times by highcharts
+                            var chart = this;
+                            //this.subTitle({ text: 'chart 1' });
 
-                        //add the line for the quadrants if parent is the HLFS graph (this isnt the ideal way...)
-                        if( parentX.indexOf('Ideal Speed') >= 0) {
-                            this.xAxis[0].addPlotLine({
-                                id: 'hlfs-origin-x',
-                                value: 0,
-                                color: 'rgb(192, 192, 192)',
-                                width: 2
+                            this.yAxis[0].update({
+                                title: {
+                                    text: parentY
+                                }
                             });
-                            this.yAxis[0].addPlotLine({
-                                id: 'hlfs-origin-y',
-                                value: 0,
-                                color: 'rgb(192, 192, 192, 0.6)',
-                                width: 2
+                            this.xAxis[0].update({
+                                title: {
+                                    text: parentX
+                                }
                             });
+
+                            //add the line for the quadrants if parent is the HLFS graph (this isnt the ideal way...)
+                            if (parentX.indexOf('Ideal Speed') >= 0) {
+                                this.xAxis[0].addPlotLine({
+                                    id: 'hlfs-origin-x',
+                                    value: 0,
+                                    color: 'rgb(192, 192, 192)',
+                                    width: 2
+                                });
+                                this.yAxis[0].addPlotLine({
+                                    id: 'hlfs-origin-y',
+                                    value: 0,
+                                    color: 'rgb(192, 192, 192, 0.6)',
+                                    width: 2
+                                });
+                            }
+
+                            for (j = 0; j < numSeries; j++) {
+                                this.get(j + 1).setVisible(isVisible[j]);
+                            }
+
+                            this.xAxis[0].setCategories(null);
+                            this.setTitle(null, {text: parentSubTitle});
                         }
 
-                        for (j = 0; j < numSeries; j++) {
-                            this.get(j+1).setVisible(isVisible[j]);
-                        }
-
-                        this.xAxis[0].setCategories(null);
-                        this.setTitle(null, { text: parentSubTitle});
-
+                        upCtr += 1;
                     }
                 },
                 animation: Highcharts.svg // don't animate in old IE
@@ -352,6 +369,7 @@
             },
             plotOptions: {
                 scatter: {
+                    animation:false,
                     marker: {
                         states: {
                             hover: {
@@ -376,6 +394,9 @@
                     },
                     colorByPoint: true,
                     turboThreshold: 9999
+                },
+                line: {
+                    animation: false
                 }
             },
             credits: {
