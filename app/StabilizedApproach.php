@@ -68,16 +68,16 @@ class StabilizedApproach extends Model {
                 {$fields},
                 @tot:= (SELECT  COUNT(*)
                     FROM    stabilized_approach t2
-                    WHERE   t2.flight = stabilized_approach.flight
+                    WHERE   t2.flight = stabilized_approach.flight AND t2.airport_id = {$runway}
                 ) AS 'total',
                 @ctr:= IFNULL(@ctr, 0) + 1 AS 'apprNo',
 	            IF (@ctr >= @tot, @ctr:= 0, @ctr:= @ctr)"))
             ->where('fleet_id', '=', $fleet)
             ->where('airport_id', '=', $runway)
             ->whereRaw("YEAR(fltDate) = {$year}")
-            ->whereRaw("MONTH(fltDate) = {$month}");
-            //->orderBy('flight', 'ASC')
-            //->orderBy('timeOfFinal', 'ASC');
+            ->whereRaw("MONTH(fltDate) = {$month}")
+            ->orderBy('flight', 'ASC')
+            ->orderBy('timeOfFinal', 'ASC');
 
     }
 
