@@ -71,7 +71,7 @@ class StabilizedApproach extends Model {
                     WHERE   t2.flight = stabilized_approach.flight
                 ) AS 'total',
                 @ctr:= IFNULL(@ctr, 0) + 1 AS 'apprNo',
-	            IF (@ctr = @tot, @ctr:= 0, @ctr:= @ctr)"))
+	            IF (@ctr >= @tot, @ctr:= 0, @ctr:= @ctr)"))
             ->where('fleet_id', '=', $fleet)
             ->where('airport_id', '=', $runway)
             ->whereRaw("YEAR(fltDate) = {$year}")
