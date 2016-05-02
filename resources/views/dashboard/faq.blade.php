@@ -1,5 +1,13 @@
 @extends('NGAFID-master')
 
+@section('cssScripts')
+    <style>
+        th{
+            white-space: pre-line;
+        }
+    </style>
+@endsection
+
 @section('content')
     <div class="container-fluid">
         <div class="row">
@@ -48,26 +56,63 @@
                                     <div class="media-body">
                                         <p class="media-heading text-info"><b>How Many Flights & Flight Hours have been Contributed?</b></p>
 
-                                            @foreach($flightInfo as $fltInfo)
-                                                @if($fltInfo->type == 'F')
-                                                    <div class="media">
-                                                        <b class="media-heading text-primary">Fleets</b>
-                                                        <div class="media-body">
-                                                            No Uploaded: {{$fltInfo->uploads}}
-                                                            <br>Flight Hours: {{$fltInfo->hours}}
-                                                        </div>
+                                        <div class="row">
+                                            <div id="no-more-tables" class="col-md-10">
+                                                <table class="table table-hover table-condensed" style="border-collapse:collapse;margin:0px;">
+                                                    <thead>
+                                                    <tr class="text-info">
+                                                        <th class="col-xs-1 text-left">NGAFID</th>
+                                                        <th class="col-xs-1 text-center">Flights</th>
+                                                        <th class="col-xs-1 text-center">New <br>Flights<sup><small><span class="glyphicon glyphicon-asterisk"></span></small></sup></th>
+                                                        <th class="col-xs-1 text-center">Flight <br>Hours</th>
+                                                        <th class="col-xs-1 text-center">New <br>Flight <br>Hours<sup><small><span class="glyphicon glyphicon-asterisk"></span></small></sup></th>
+                                                        <th class="col-xs-1 text-center">Accounts</th>
+                                                        <th class="col-xs-1 text-center">New <br>Accounts<sup><small><span class="glyphicon glyphicon-asterisk"></span></small></sup></th>
+                                                    </tr>
+                                                    </thead>
+                                                </table>
+                                                @foreach($statistics as $stats)
+                                                    <div class="div-table-content">
+                                                        <table class="table">
+                                                            <tbody>
+                                                            @if($stats->accountType == 'F')
+                                                                <tr>
+                                                                    <td class="col-xs-1 text-left text-nowrap" data-title="Account Type">Fleet</td>
+                                                                    <td class="col-xs-1 text-center text-nowrap" data-title="Flights">{{$stats->flights}}</td>
+                                                                    <td class="col-xs-1 text-center text-nowrap" data-title="New Flights">{{$stats->newFlights}}</td>
+                                                                    <td class="col-xs-1 text-center text-nowrap" data-title="Flight Hours">{{$stats->flightHours}}</td>
+                                                                    <td class="col-xs-1 text-center text-nowrap" data-title="New Flight Hours">{{$stats->newFlightHours}}</td>
+                                                                    <td class="col-xs-1 text-center text-nowrap" data-title="Accounts">{{$stats->accounts}}</td>
+                                                                    <td class="col-xs-1 text-center text-nowrap" data-title="New Accounts">{{$stats->newAccounts}}</td>
+                                                                </tr>
+                                                            @elseif($stats->accountType == 'N')
+                                                                <tr>
+                                                                    <td class="col-xs-1 text-left text-nowrap" data-title="Account Type">Non-Fleet</td>
+                                                                    <td class="col-xs-1 text-center text-nowrap" data-title="Flights">{{$stats->flights}}</td>
+                                                                    <td class="col-xs-1 text-center text-nowrap" data-title="New Flights">{{$stats->newFlights}}</td>
+                                                                    <td class="col-xs-1 text-center text-nowrap" data-title="Flight Hours">{{$stats->flightHours}}</td>
+                                                                    <td class="col-xs-1 text-center text-nowrap" data-title="New Flight Hours">{{$stats->newFlightHours}}</td>
+                                                                    <td class="col-xs-1 text-center text-nowrap" data-title="Accounts">{{$stats->accounts}}</td>
+                                                                    <td class="col-xs-1 text-center text-nowrap" data-title="New Accounts">{{$stats->newAccounts}}</td>
+                                                                </tr>
+                                                            @elseif($stats->accountType == 'G')
+                                                                <tr>
+                                                                    <td class="col-xs-1 text-left text-nowrap" data-title="Account Type">GAARD</td>
+                                                                    <td class="col-xs-1 text-center text-nowrap" data-title="Flights">{{$stats->flights}}</td>
+                                                                    <td class="col-xs-1 text-center text-nowrap" data-title="New Flights">{{$stats->newFlights}}</td>
+                                                                    <td class="col-xs-1 text-center text-nowrap" data-title="Flight Hours">{{$stats->flightHours}}</td>
+                                                                    <td class="col-xs-1 text-center text-nowrap" data-title="New Flight Hours">{{$stats->newFlightHours}}</td>
+                                                                    <td class="col-xs-1 text-center text-nowrap" data-title="Accounts">{{$stats->accounts}}</td>
+                                                                    <td class="col-xs-1 text-center text-nowrap" data-title="New Accounts">{{$stats->newAccounts}}</td>
+                                                                </tr>
+                                                            @endif
+                                                            </tbody>
+                                                        </table>
                                                     </div>
-                                                @elseif($fltInfo->type == 'O')
-                                                    <div class="media">
-                                                        <b class="media-heading text-primary">Non-Fleet (i.e. Individual Operators)</b>
-                                                        <div class="media-body">
-                                                            No Uploaded: {{$fltInfo->uploads}}
-                                                            <br>Flight Hours: {{$fltInfo->hours}}
-                                                        </div>
-                                                    </div>
-                                                @endif
-
-                                            @endforeach
+                                                @endforeach
+                                            </div>
+                                            <p class="pull-left text-danger"><b><small><sup><span class="glyphicon glyphicon-asterisk"></span></sup>New flight/user information as of {{date("Y-n-j", strtotime("last day of previous month"))}}</small></b></p>
+                                        </div>
                                     </div>
                                 </li>
                             </ul>
