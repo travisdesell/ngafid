@@ -8,8 +8,8 @@
                     <div class="panel-heading"><b>Service Unavailable</b> <span class="pull-right">{{date("D M d, Y G:i A T")}}</span></div>
 
                     <div class="panel-body">
-                        <p>The National General Aviation Flight Information Database will be performing maintenance on
-                            May 31 to June 1, 2016. During that time, access to our website will be temporarily unavailable.
+                        <p>The National General Aviation Flight Information Database is currently performing scheduled
+                            maintenance. During this time, access to our website will be temporarily unavailable.
                             We appreciate your patience as we perform these upgrades to better serve you.</p>
 
                         <p>Users who participate via the GAARD app may continue to record their flights using their mobile device.
