@@ -43,7 +43,7 @@
         <li><a href="{{ url('import/status') }}">Import Status/History</a></li>
     </ul>
 </li>
-@if(Auth::user()->org_id == 1)
+@if(Auth::user()->org_id == 1 || Auth::user()->org_id == 89)
 <li  class="dropdown">
     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Stabilized Approach<span class="caret"></span></a>
     <ul class="dropdown-menu" role="menu">
