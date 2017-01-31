@@ -8,6 +8,9 @@
                     <div class="panel-heading"><b>Welcome to the National General Aviation Flight Information Database (NGAFID)</b></div>
 
                     <div class="panel-body">
+                        <p class="text-danger"><strong><em>Please note that the NGAFID will be unavailable intermittently during the month of February due to system maintenance and upgrades  Thank you for your understanding.</em></strong></p>
+                        <br>
+
                         <p>The NGAFID is a joint industry-FAA initiative designed to bring voluntary Flight Data Monitoring (FDM) to General Aviation.
                             While sharing flight data is voluntary, there are many reasons pilots and operators should consider participating.
                         </p>
