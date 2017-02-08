@@ -59,14 +59,14 @@
 @endsection
 
 @section('jsScripts')
-    <link href="//code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css" rel="stylesheet" />
-    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
-    <script src="//code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
+    <link href="https://code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="https://code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
 
-    <script src="http://code.highcharts.com/highcharts.js"></script>
-    <script src="http://code.highcharts.com/modules/drilldown.js"></script>
-    <script src="http://code.highcharts.com/modules/no-data-to-display.js"></script>
-    <script src="http://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/4.2.2/highcharts.js"></script>
+    <script src="https://code.highcharts.com/4.2.2/modules/drilldown.js"></script>
+    <script src="https://code.highcharts.com/4.2.2/modules/no-data-to-display.js"></script>
+    <script src="https://code.highcharts.com/4.2.2/modules/exporting.js"></script>
     <script type="text/javascript">
         $(function() {
             $("#airports").autocomplete({
