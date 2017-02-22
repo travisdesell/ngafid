@@ -84,22 +84,22 @@ class StabilizedApproach extends Model {
     public function scopeGraphApproach($query, $flight, $flightTime, $start, $end)
     {
         return \DB::select(\DB::raw(
-            "SELECT AddTime('{$flightTime}', COALESCE(SEC_TO_TIME(time/1000), 0)) AS time_sec,
-                AVG(roll_attitude) AS roll,
+            "SELECT AddTime('{$flightTime}', COALESCE(SEC_TO_TIME(FLOOR(time/1000)), 0)) AS time_sec,
+                roll_attitude AS roll,
                 CASE
                     WHEN roll_attitude < 30 THEN 'rgba(0, 153, 151, .7)'
                     WHEN roll_attitude > 30 AND roll_attitude < 40 THEN 'rgba(255, 204, 0, .7)'
                     ELSE 'rgba(223, 83, 83, .7)'
                 END AS 'roll_color',
-                AVG(pitch_attitude) AS pitch,
+                pitch_attitude AS pitch,
                 'black' AS 'pitch_color',
-                AVG(indicated_airspeed) AS ias,
+                indicated_airspeed AS ias,
                 CASE
                     WHEN indicated_airspeed > 70 THEN 'red'
                     WHEN indicated_airspeed > 65 THEN 'yellow'
                     ELSE 'green'
                 END AS 'ias_color',
-                AVG(vertical_airspeed) AS vsi,
+                vertical_airspeed AS vsi,
                 CASE
                     WHEN vertical_airspeed < -1000 THEN 'red'
                     ELSE 'green'
@@ -107,7 +107,6 @@ class StabilizedApproach extends Model {
             FROM main
             WHERE flight = {$flight}
               AND `time` BETWEEN {$start} AND {$end}
-            GROUP BY time_sec ASC
             ORDER BY time_sec ASC;"
         ));
     }
