@@ -5,6 +5,9 @@
         th{
             white-space: pre-line;
         }
+        .table td {
+            text-align: center;
+        }
     </style>
 @endsection
 
@@ -57,17 +60,17 @@
                                         <p class="media-heading text-info"><b>How Many Flights & Flight Hours have been Contributed?</b></p>
 
                                         <div class="row">
-                                            <div id="no-more-tables" class="col-md-10">
+                                            <div id="no-more-tables" class="col-md-12">
                                                 <table class="table table-hover table-condensed" style="border-collapse:collapse;margin:0px;">
                                                     <thead>
                                                     <tr class="text-info">
                                                         <th class="col-xs-1 text-left">NGAFID</th>
                                                         <th class="col-xs-1 text-center">Flights</th>
-                                                        <th class="col-xs-1 text-center">New <br>Flights<sup><small><span class="glyphicon glyphicon-asterisk"></span></small></sup></th>
-                                                        <th class="col-xs-1 text-center">Flight <br>Hours</th>
-                                                        <th class="col-xs-1 text-center">New <br>Flight <br>Hours<sup><small><span class="glyphicon glyphicon-asterisk"></span></small></sup></th>
+                                                        <th class="col-xs-1 text-center">New <br>Flights<sup>&dagger;</sup></th>
+                                                        <th class="col-xs-2 text-center">Flight <br>Hours</th>
+                                                        <th class="col-xs-2 text-center">New <br>Flight <br>Hours<sup>&dagger;</sup></th>
                                                         <th class="col-xs-1 text-center">Accounts</th>
-                                                        <th class="col-xs-1 text-center">New <br>Accounts<sup><small><span class="glyphicon glyphicon-asterisk"></span></small></sup></th>
+                                                        <th class="col-xs-1 text-center">New <br>Accounts<sup>&dagger;</sup></th>
                                                     </tr>
                                                     </thead>
                                                 </table>
@@ -80,8 +83,8 @@
                                                                     <td class="col-xs-1 text-left text-nowrap" data-title="Account Type">Fleet</td>
                                                                     <td class="col-xs-1 text-center text-nowrap" data-title="Flights">{{$stats->flights}}</td>
                                                                     <td class="col-xs-1 text-center text-nowrap" data-title="New Flights">{{$stats->newFlights}}</td>
-                                                                    <td class="col-xs-1 text-center text-nowrap" data-title="Flight Hours">{{$stats->flightHours}}</td>
-                                                                    <td class="col-xs-1 text-center text-nowrap" data-title="New Flight Hours">{{$stats->newFlightHours}}</td>
+                                                                    <td class="col-xs-2 text-center text-nowrap" data-title="Flight Hours">{{$stats->flightHours}}</td>
+                                                                    <td class="col-xs-2 text-center text-nowrap" data-title="New Flight Hours">{{$stats->newFlightHours}}</td>
                                                                     <td class="col-xs-1 text-center text-nowrap" data-title="Accounts">{{$stats->accounts}}</td>
                                                                     <td class="col-xs-1 text-center text-nowrap" data-title="New Accounts">{{$stats->newAccounts}}</td>
                                                                 </tr>
@@ -90,8 +93,8 @@
                                                                     <td class="col-xs-1 text-left text-nowrap" data-title="Account Type">Non-Fleet</td>
                                                                     <td class="col-xs-1 text-center text-nowrap" data-title="Flights">{{$stats->flights}}</td>
                                                                     <td class="col-xs-1 text-center text-nowrap" data-title="New Flights">{{$stats->newFlights}}</td>
-                                                                    <td class="col-xs-1 text-center text-nowrap" data-title="Flight Hours">{{$stats->flightHours}}</td>
-                                                                    <td class="col-xs-1 text-center text-nowrap" data-title="New Flight Hours">{{$stats->newFlightHours}}</td>
+                                                                    <td class="col-xs-2 text-center text-nowrap" data-title="Flight Hours">{{$stats->flightHours}}</td>
+                                                                    <td class="col-xs-2 text-center text-nowrap" data-title="New Flight Hours">{{$stats->newFlightHours}}</td>
                                                                     <td class="col-xs-1 text-center text-nowrap" data-title="Accounts">{{$stats->accounts}}</td>
                                                                     <td class="col-xs-1 text-center text-nowrap" data-title="New Accounts">{{$stats->newAccounts}}</td>
                                                                 </tr>
@@ -100,8 +103,8 @@
                                                                     <td class="col-xs-1 text-left text-nowrap" data-title="Account Type">GAARD</td>
                                                                     <td class="col-xs-1 text-center text-nowrap" data-title="Flights">{{$stats->flights}}</td>
                                                                     <td class="col-xs-1 text-center text-nowrap" data-title="New Flights">{{$stats->newFlights}}</td>
-                                                                    <td class="col-xs-1 text-center text-nowrap" data-title="Flight Hours">{{$stats->flightHours}}</td>
-                                                                    <td class="col-xs-1 text-center text-nowrap" data-title="New Flight Hours">{{$stats->newFlightHours}}</td>
+                                                                    <td class="col-xs-2 text-center text-nowrap" data-title="Flight Hours">{{$stats->flightHours}}</td>
+                                                                    <td class="col-xs-2 text-center text-nowrap" data-title="New Flight Hours">{{$stats->newFlightHours}}</td>
                                                                     <td class="col-xs-1 text-center text-nowrap" data-title="Accounts">{{$stats->accounts}}</td>
                                                                     <td class="col-xs-1 text-center text-nowrap" data-title="New Accounts">{{$stats->newAccounts}}</td>
                                                                 </tr>
@@ -111,7 +114,7 @@
                                                     </div>
                                                 @endforeach
                                             </div>
-                                            <p class="pull-left text-danger"><b><small><sup><span class="glyphicon glyphicon-asterisk"></span></sup>New flight/user information as of {{date("Y-n-j", strtotime("last day of previous month"))}}</small></b></p>
+                                            <p class="pull-left text-danger"><b><small><sup>&dagger;</sup>New information as of {{date("Y-n-j", strtotime("last day of previous month"))}}</small></b></p>
                                         </div>
                                     </div>
                                 </li>
