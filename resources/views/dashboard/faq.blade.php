@@ -5,9 +5,6 @@
         th{
             white-space: pre-line;
         }
-        .table td {
-            text-align: center;
-        }
     </style>
 @endsection
 
@@ -61,7 +58,7 @@
 
                                         <div class="row">
                                             <div id="no-more-tables" class="col-md-12">
-                                                <table class="table table-hover table-condensed" style="border-collapse:collapse;margin:0px;">
+                                                <table class="table table-condensed" style="border-collapse:collapse;margin:0px;">
                                                     <thead>
                                                     <tr class="text-info">
                                                         <th class="col-xs-1 text-left">NGAFID</th>
@@ -76,7 +73,7 @@
                                                 </table>
                                                 @foreach($statistics as $stats)
                                                     <div class="div-table-content">
-                                                        <table class="table">
+                                                        <table class="table table-condensed">
                                                             <tbody>
                                                             @if($stats->accountType == 'F')
                                                                 <tr>
@@ -86,7 +83,7 @@
                                                                     <td class="col-xs-2 text-center text-nowrap" data-title="Flight Hours">{{$stats->flightHours}}</td>
                                                                     <td class="col-xs-2 text-center text-nowrap" data-title="New Flight Hours">{{$stats->newFlightHours}}</td>
                                                                     <td class="col-xs-1 text-center text-nowrap" data-title="Accounts">{{$stats->accounts}}</td>
-                                                                    <td class="col-xs-1 text-center text-nowrap" data-title="New Accounts">{{$stats->newAccounts}}</td>
+                                                                    <td class="col-xs-1 text-right text-nowrap" data-title="New Accounts">{{$stats->newAccounts}}</td>
                                                                 </tr>
                                                             @elseif($stats->accountType == 'N')
                                                                 <tr>
@@ -96,7 +93,7 @@
                                                                     <td class="col-xs-2 text-center text-nowrap" data-title="Flight Hours">{{$stats->flightHours}}</td>
                                                                     <td class="col-xs-2 text-center text-nowrap" data-title="New Flight Hours">{{$stats->newFlightHours}}</td>
                                                                     <td class="col-xs-1 text-center text-nowrap" data-title="Accounts">{{$stats->accounts}}</td>
-                                                                    <td class="col-xs-1 text-center text-nowrap" data-title="New Accounts">{{$stats->newAccounts}}</td>
+                                                                    <td class="col-xs-1 text-right text-nowrap" data-title="New Accounts">{{$stats->newAccounts}}</td>
                                                                 </tr>
                                                             @elseif($stats->accountType == 'G')
                                                                 <tr>
@@ -106,7 +103,7 @@
                                                                     <td class="col-xs-2 text-center text-nowrap" data-title="Flight Hours">{{$stats->flightHours}}</td>
                                                                     <td class="col-xs-2 text-center text-nowrap" data-title="New Flight Hours">{{$stats->newFlightHours}}</td>
                                                                     <td class="col-xs-1 text-center text-nowrap" data-title="Accounts">{{$stats->accounts}}</td>
-                                                                    <td class="col-xs-1 text-center text-nowrap" data-title="New Accounts">{{$stats->newAccounts}}</td>
+                                                                    <td class="col-xs-1 text-right text-nowrap" data-title="New Accounts">{{$stats->newAccounts}}</td>
                                                                 </tr>
                                                             @endif
                                                             </tbody>
