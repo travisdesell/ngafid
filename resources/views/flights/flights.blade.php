@@ -162,7 +162,7 @@
                                             <a href="{{URL::route('flights.edit', $flight['id']) }}" class="glyphicon glyphicon-pencil" title="Edit flight"></a> &nbsp;&nbsp;
                                             <a href="{{URL::route('flights/chart', $flight['id']) }}" class="glyphicon glyphicon-stats" title="Flight stats"></a> &nbsp;&nbsp;
                                             @if($flight['num_events'] > 0 && \Route::is('flights/event'))
-                                                <b>Exceedance Details:</b><a href="#summary" class="displaySummary" data-toggle="modal" data-link="{{URL::route('flights/download', $flight['id'] . '/data/'. $selected['event'] . '/30') }}"><span class="glyphicon glyphicon-list-alt"></span></a><br>
+                                                <a href="#summary" class="displaySummary" data-toggle="modal" data-link="{{URL::route('flights/download', $flight['id'] . '/data/'. $selected['event'] . '/30') }}"><span class="glyphicon glyphicon-list-alt text-warning"></span></a> &nbsp;&nbsp;
                                             @endif
                                             <div class="btn-group">
                                                 <a href="#" class="glyphicon glyphicon-download-alt" data-toggle="dropdown" title="Download flight"></a> &nbsp;&nbsp;
