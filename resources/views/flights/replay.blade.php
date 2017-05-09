@@ -51,7 +51,7 @@
             viewer.terrainProvider = cesiumTerrainProviderMeshes;
 
             //Enable lighting based on sun/moon positions
-            viewer.scene.globe.enableLighting = true;
+            viewer.scene.globe.enableLighting = false;
 
             //Use STK World Terrain
             viewer.terrainProvider = new Cesium.CesiumTerrainProvider({
@@ -160,7 +160,7 @@
                     viewer.flyTo(PropPlane).then(function(){
                         viewer.trackedEntity = PropPlane;
                         viewer.selectedEntity = viewer.trackedEntity;
-                        viewer.clock.multiplier = 5;
+                        viewer.clock.multiplier = 10;
                         viewer.clock.shouldAnimate = true;
 
                     });

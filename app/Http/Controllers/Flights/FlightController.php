@@ -36,6 +36,7 @@ class FlightController extends Controller {
 
         if($selectedFlight != '')
         {
+            //check if this is a valid flight ID for the fleet/operator.
             $validFlight = $fleetTable->find(\Auth::user()->org_id)->flights()->where('id', '=', $selectedFlight)->first();
 
             if($validFlight)
@@ -222,85 +223,6 @@ class FlightController extends Controller {
     {
 
     }
-
-    /*This method has been refactored into the index method
-     * public function exceedance()
-    {
-        //TO DO: update this method to accept the filter options
-        $flightIdTable = new FlightID();
-
-        $event = \Request::query('event');
-        $startDate  = \Request::query('startDate');
-        $endDate    = \Request::query('endDate');
-        $filter   = \Request::query('filter');
-        $sort       = \Request::query('sort');
-        //$flight = \Request::query('flight');
-        //in future allow passing flight id to filter query for the exceedance triggered by a particular flight
-
-        $fleetID = \Auth::user()->org_id;
-        $column = '';
-
-        switch($event)
-        {
-            case 'excessive-roll':
-                $column = 'excessive_roll';
-                break;
-            case 'excessive-pitch':
-                $column = 'excessive_pitch';
-                break;
-            case 'excessive-speed':
-                $column = 'excessive_speed';
-                break;
-            case 'high-cht':
-                $column = 'high_cht';
-                break;
-            case 'high-altitude':
-                $column = 'high_altitude';
-                break;
-            case 'low-fuel':
-                $column = 'low_fuel';
-                break;
-            case 'low-oil-pressure':
-                $column = 'low_oil_pressure';
-                break;
-            case 'low-airspeed-approach':
-                $column = 'low_airspeed_on_approach';
-                break;
-            case 'excessive-lateral-acceleration':
-                $column = 'excessive_lateral_acceleration';
-                break;
-            case 'excessive-vertical-acceleration':
-                $column = 'excessive_vertical_acceleration';
-                break;
-            case 'excessive-longitudinal-acceleration':
-                $column = 'excessive_longitudinal_acceleration';
-                break;
-            case 'low-airspeed-climbout':
-                $column = 'low_airspeed_on_climbout';
-                break;
-            case 'excessive-vsi-final':
-                $column = 'excessive_vsi_on_final';
-                break;
-            default:
-                $column = '';
-                break;
-        }
-
-        if($column != '')
-        {
-            $selected = array();
-            $selected['startDate']   = $startDate;
-            $selected['endDate']     = $endDate;
-            $selected['sortBy']      = $sort;
-            $selected['filter']      = $filter;
-
-
-            $getFlights = $flightIdTable->aircraftExceedance($fleetID, $column)->paginate($this->perPage);
-            return view('flights.flights')->with(['data' => $getFlights, 'selected' => $selected]);
-        }
-
-        return redirect('flights');
-    }*/
 
     public function trend()
     {
@@ -591,9 +513,36 @@ class FlightController extends Controller {
             switch ($fileType) {
                 case 'csv':
                     $filename .= '.csv';
-                    $header  = "#File created by the National General Aviation Flight Information Database Reanimation Tool\n";
-                    $header .= "time (seconds), oat, longitude, latitude, msl, radio altitude, pitch, roll, heading, airspeed, vertical speed, "; //in future make column names dynamic
-                    $header .= "nav 1 freq, nav 2 freq, obs 1, altimeter, eng 1 egt 1, eng 1 egt 2, eng 1 egt 3, eng 1 egt 4, eng 1 fuel flow, eng 1 rpm\n";
+                    $header  = "#File created by the National General Aviation Flight Information Database\n";
+                    $header .= "time, latitude, longitude, msl altitude, derived radio altitude, pitch, roll, heading, course, airspeed, vertical speed ";
+
+                    if($validFlight['recorder_type'] == 'F'){
+                        //common fields for most G1000 recorders
+                        $header .= ",tas , oat, nav 1 freq, nav 2 freq, obs 1, altimeter, lateral acceleration, vertical acceleration";
+                        $header .= ", eng 1 egt 1, eng 1 egt 2, eng 1 egt 3, eng 1 egt 4, eng 1 egt 5, eng 1 egt 6";
+
+                        if($validFlight['aircraft_type'] != 7) {
+
+                            if($validFlight['aircraft_type'] == 6){
+                                $header .= ", eng 1 cht 1";
+                            }
+                            else {
+                                $header .= ", eng 1 cht 1, eng 1 cht 2, eng 1 cht 3, eng 1 cht 4, eng 1 cht 5, eng 1 cht 6";
+                            }
+                        }
+
+                        $header .= ", eng 1 fuel flow, fuel quantity left, fuel quantity right, eng 1 oil temp, eng 1 oil press, eng 1 rpm ";
+
+                        if($validFlight['aircraft_type'] == 6){//PA44
+                            $header .= ", eng 1 mp, eng 2 egt 1, eng 2 egt 2, eng 2 egt 3, eng 2 egt 4";
+                            $header .= ", eng 2 cht 1, eng 2 fuel flow, eng 2 oil temp, eng 2 oil press, eng 2 rpm, eng 2 mp ";
+                        }
+                        elseif($validFlight['aircraft_type'] == 8){ //SR20
+                            $header .= ", eng 1 mp ";
+                        }
+                    }
+
+                    $header .= "\n";
                     break;
 
                 case 'kml':
@@ -615,7 +564,7 @@ class FlightController extends Controller {
                     $header .= '<width>2</width>' . "\n";
                     $header .= '</PolyStyle>' . "\n";
                     $header .= '</Style>' . "\n";
-                    $header .= '@LookAt@';
+                    $header .= 'DynamicContent';
                     $header .= '<Placemark>' . "\n";
                     $header .= '<styleUrl>#flightPathStyle</styleUrl>' . "\n";
                     $header .= '<LineString>' . "\n";
@@ -640,18 +589,64 @@ class FlightController extends Controller {
                     break;
 
                 case 'data':
-                    $header  = '<table class="table table-hover table-striped table-condensed" style="margin:0px;">';
-                    $header .= '<thead><tr class="col-md-12">';
-                    $header .= '<th class="col-md-1 text-center">Time</th>
-                                <th class="col-md-2 text-center">MSL</th>
-                                <th class="col-md-2 text-center">Airspeed</th>
-                                <th class="col-md-1 text-center">Speed</th>
-                                <th class="col-md-2 text-center">Heading</th>
-                                <th class="col-md-1 text-left">Pitch</th>
-                                <th class="col-md-1 text-right">Roll</th>
-                                <th class="col-md-2 text-right">Eng RPM</th>';
-                    $header .='</tr></thead></table><div class="div-table-content"><table class="table table-condensed"><tbody>';
-                    //NB: CHTs, Eng Oil Press, Fuel Qtys not shown, check if needed....
+                    $header  = '<table class="table table-responsive table-striped table-bordered" style="border-collapse: collapse; border-spacing: 0; margin-bottom:0; font-size: 11px;">';
+                    $header .= '<thead><tr>';
+                    $header .= '<th class="text-center">Time</th>
+                                <th class="text-center">MSL</th>
+                                <th class="text-center">AGL</th>
+                                <th class="text-center">IAS</th>
+                                <th class="text-center">VSI</th>
+                                <th class="text-center">Hdg</th>
+                                <th class="text-center">Pitch</th>
+                                <th class="text-center">Roll</th>
+                                <th class="text-center">Eng 1 RPM</th>';
+                    if($validFlight['aircraft_type'] == 6){
+                        $header .= '<th class="text-center">Eng 1 MP</th>
+                                    <th class="text-center">Eng 2 RPM</th>
+                                    <th class="text-center">Eng 2 MP</th>';
+                    }
+                    elseif($validFlight['aircraft_type'] == 8){
+                        $header .= '<th class="text-center">Eng 1 MP</th>';
+                    }
+
+                    //display dynamic column names based on the event
+                    if($eventID == 4){//high CHT
+                        $tmpEngHdr = '<th class="text-center" colspan="4">Eng 1 CHT</th>';
+
+                        if(($validFlight['aircraft_type'] == 2) || ($validFlight['aircraft_type'] == 8)){
+                            $tmpEngHdr = str_replace('colspan="4"', 'colspan="6"', $tmpEngHdr);
+                        }
+                        elseif($validFlight['aircraft_type'] == 6){
+                            $tmpEngHdr = str_replace('colspan="4"', 'colspan="1"', $tmpEngHdr);
+                            $tmpEngHdr .= '<th class="text-center" colspan="1">Eng 2 CHT</th>';
+                        }
+
+                        $header .= $tmpEngHdr;
+                    }
+                    elseif($eventID == 6){//low fuel
+                        $header .= '<th class="text-center">Fuel Qty Left</th>';
+                        $header .= '<th class="text-center">Fuel Qty Right</th>';
+                    }
+                    elseif($eventID == 7){//low oil pressure
+                        $header .= '<th class="text-center">Eng 1 Oil Press</th>';
+
+                        if($validFlight['aircraft_type'] == 6){
+                            $header .= '<th class="text-center">Eng 2 Oil Press</th>';
+                        }
+                    }
+                    elseif($eventID == 9){//excessive lateral (g)
+                        $header .= '<th class="text-center">Lateral (g)</th>';
+                    }
+                    elseif($eventID == 10){//excessive vertical (g)
+                        $header .= '<th class="text-center">Vertical (g)</th>';
+                    }
+                    elseif($eventID == 11){//excessive longitudinal (g)
+                        $header .= '<th class="text-center">Longitudinal (g)</th>';
+                    }
+
+                    $header .='</tr></thead></table>';
+                    $header .= '<div style="max-height: 230px; overflow: auto;"><table class="table table-fixed table-responsive table-striped table-bordered" style="font-size: 10px;"><tbody>';
+
                     $footer  = '</tbody></table></div>';
                     break;
 
@@ -694,12 +689,39 @@ class FlightController extends Controller {
                     //print_r($row);
                     switch ($fileType) {
                         case 'csv':
-                            $contents .= "$row->time, $row->oat, $row->longitude, $row->latitude, $row->msl_altitude, ";
+                            $tmpTime = date("H:i:s", strtotime("{$validFlight['time']} + $row->time seconds"));
+                            $contents .= "$tmpTime, $row->latitude, $row->longitude, $row->msl_altitude, ";
                             $contents .= "$row->radio_altitude_derived, $row->pitch_attitude, $row->roll_attitude, ";
-                            $contents .= "$row->heading, $row->indicated_airspeed, $row->vertical_airspeed, ";
-                            $contents .= "$row->nav_1_freq, $row->nav_2_freq, $row->obs_1, $row->altimeter, ";
-                            $contents .= "$row->eng_1_egt_1, $row->eng_1_egt_2, $row->eng_1_egt_3, $row->eng_1_egt_4, ";
-                            $contents .= "$row->eng_1_fuel_flow, $row->eng_1_rpm \n";
+                            $contents .= "$row->heading, $row->course, $row->indicated_airspeed, $row->vertical_airspeed ";
+
+                            if($validFlight['recorder_type'] == 'F') {
+                                //common fields for most G1000 recorders
+                                $contents .= ", $row->tas, $row->oat, $row->nav_1_freq, $row->nav_2_freq, $row->obs_1, $row->altimeter, $row->lateral_acceleration, $row->vertical_acceleration";
+                                $contents .= ", $row->eng_1_egt_1, $row->eng_1_egt_2, $row->eng_1_egt_3, $row->eng_1_egt_4, $row->eng_1_egt_5, $row->eng_1_egt_6";
+
+                                if($validFlight['aircraft_type'] != 7) {
+
+                                    if($validFlight['aircraft_type'] == 6){
+                                        $contents .= ", $row->eng_1_cht_1";
+                                    }
+                                    else {
+                                        $contents .= ", $row->eng_1_cht_1, $row->eng_1_cht_2, $row->eng_1_cht_3, $row->eng_1_cht_4, $row->eng_1_cht_5, $row->eng_1_cht_6";
+                                    }
+                                }
+
+                                $contents .= ", $row->eng_1_fuel_flow, $row->fuel_quantity_left_main, $row->fuel_quantity_right_main, $row->eng_1_oil_temp, $row->eng_1_oil_press, $row->eng_1_rpm ";
+
+                                if($validFlight['aircraft_type'] == 6){//PA44
+                                    $contents .= ", $row->eng_1_mp, $row->eng_2_egt_1, $row->eng_2_egt_2, $row->eng_2_egt_3, $row->eng_2_egt_4";
+                                    $contents .= ", $row->eng_2_cht_1, $row->eng_2_fuel_flow, $row->eng_2_oil_temp, $row->eng_2_oil_press, $row->eng_2_rpm, $row->eng_2_mp ";
+                                }
+                                elseif($validFlight['aircraft_type'] == 8){ //SR20
+                                    $contents .= ", $row->eng_1_mp ";
+                                }
+
+                            }
+
+                            $contents .= "\n";
                             break;
 
                         case 'kml':
@@ -732,15 +754,66 @@ class FlightController extends Controller {
                             break;
 
                         case 'data':
-                            $contents .= '<tr class="col-md-12 ' . ($row->event == 1 ? ' danger ' : '') . '">';
-                            $contents .= '<td class="col-md-1 text-center">' . gmdate("H:i:s", floor($row->time))        . '</td>';
-                            $contents .= '<td class="col-md-2 text-center">' . $row->msl_altitude        . '</td>';
-                            $contents .= '<td class="col-md-2 text-center">' . $row->indicated_airspeed  . '</td>';
-                            $contents .= '<td class="col-md-1 text-center">' . $row->vertical_airspeed   . '</td>';
-                            $contents .= '<td class="col-md-2 text-center">' . $row->heading             . '</td>';
-                            $contents .= '<td class="col-md-1 text-left">'   . $row->pitch_attitude      . '</td>';
-                            $contents .= '<td class="col-md-1 text-right">'  . $row->roll_attitude       . '</td>';
-                            $contents .= '<td class="col-md-2 text-center">' . $row->eng_1_rpm           . '</td></tr>';
+                            $contents .= '<tr class="' . ($row->event == 1 ? ' danger ' : '') . '">';
+                            $contents .= '<td class="text-left">' . date("H:i:s", strtotime("{$validFlight['time']} + $row->time seconds"))   . '</td>';
+                            $contents .= '<td>' . floor($row->msl_altitude)         . '</td>';
+                            $contents .= '<td>' . $row->radio_altitude_derived      . '</td>';
+                            $contents .= '<td>' . $row->indicated_airspeed          . '</td>';
+                            $contents .= '<td>' . floor($row->vertical_airspeed)    . '</td>';
+                            $contents .= '<td>' . floor($row->heading)              . '</td>';
+                            $contents .= '<td>' . round($row->pitch_attitude, 2)    . '</td>';
+                            $contents .= '<td>' . round($row->roll_attitude, 2)     . '</td>';
+                            $contents .= '<td>' . floor($row->eng_1_rpm)            . '</td>';
+
+                            if($validFlight['aircraft_type'] == 6){
+                                $contents .= '<td>' . $row->eng_1_mp            . '</td>';
+                                $contents .= '<td>' . floor($row->eng_2_rpm)    . '</td>';
+                                $contents .= '<td>' . $row->eng_2_mp            . '</td>';
+                            }
+                            elseif($validFlight['aircraft_type'] == 8){
+                                $contents .= '<td>' . $row->eng_1_mp   . '</td>';
+                            }
+
+                            //display dynamic values based on the event
+                            if($eventID == 4){//high CHT
+                                $contents .= '<td>' . $row->eng_1_cht_1   . '</td>';
+
+                                if($validFlight['aircraft_type'] != 6){
+                                    $contents .= '<td>' . $row->eng_1_cht_2 . '</td>';
+                                    $contents .= '<td>' . $row->eng_1_cht_3 . '</td>';
+                                    $contents .= '<td>' . $row->eng_1_cht_4 . '</td>';
+                                }
+
+                                if(($validFlight['aircraft_type'] == 2) || ($validFlight['aircraft_type'] == 8)){
+                                    $contents .= '<td>' . $row->eng_1_cht_5   . '</td>';
+                                    $contents .= '<td>' . $row->eng_1_cht_6   . '</td>';
+                                }
+                                elseif($validFlight['aircraft_type'] == 6){
+                                    $contents .= '<td>' . $row->eng_2_cht_1   . '</td>';
+                                }
+                            }
+                            elseif($eventID == 6){//low fuel
+                                $contents .= '<td>' . round($row->fuel_quantity_left_main, 2)    . '</td>';
+                                $contents .= '<td>' . round($row->fuel_quantity_right_main, 2)   . '</td>';
+                            }
+                            elseif($eventID == 7){//low oil pressure
+                                $contents .= '<td>' . $row->eng_1_oil_press            . '</td>';
+
+                                if($validFlight['aircraft_type'] == 6){
+                                    $contents .= '<td>' . $row->eng_2_oil_press        . '</td>';
+                                }
+                            }
+                            elseif($eventID == 9){//excessive lateral (g)
+                                $contents .= '<td>' . $row->lateral_acceleration       . '</td>';
+                            }
+                            elseif($eventID == 10){//excessive vertical (g)
+                                $contents .= '<td>' . $row->vertical_acceleration      . '</td>';
+                            }
+                            elseif($eventID == 10){//excessive longitudinal (g)
+                                $contents .= '<td>' . $row->longitudinal_acceleration  . '</td>';
+                            }
+
+                            $contents .= "</tr>";
                             break;
 
                         default:
@@ -760,7 +833,7 @@ class FlightController extends Controller {
 
                 if(($rowCtr == 0) && ($fileType == 'kml'))
                 {
-                    $contents  = str_replace('@LookAt@', $tmp, $contents);
+                    $contents  = str_replace('DynamicContent', $tmp, $contents);
                 }
 
                 if($fileType != 'data')
@@ -868,7 +941,7 @@ class FlightController extends Controller {
         "clock":{
             "interval":"{$flightStart}/{$flightEnd}",
             "currentTime":"{$flightStart}",
-            "multiplier":5,
+            "multiplier":10,
             "range":"LOOP_STOP",
             "step":"SYSTEM_CLOCK_MULTIPLIER"
             }
