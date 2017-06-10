@@ -1,3 +1,13 @@
-/vendor
 /node_modules
+/public/hot
+/public/storage
+/public/tmp
+/public/uploads
+/storage/*.key
+/vendor
+/.idea
+
+npm-debug.log
 .env
+.DS_Store
+._.DS_Store
