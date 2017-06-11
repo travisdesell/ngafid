@@ -69,7 +69,7 @@
 
 @section('jsScripts')
     <script src="https://code.highcharts.com/4.2.2/highcharts.js"></script>
-    <script src="http://code.highcharts.com/4.2.2/modules/no-data-to-display.js"></script>
+    <script src="https://code.highcharts.com/4.2.2/modules/no-data-to-display.js"></script>
     <script src="https://code.highcharts.com/4.2.2/modules/exporting.js"></script>
     <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
     <script src="https://code.jquery.com/ui/1.11.2/jquery-ui.js"></script>

@@ -341,7 +341,7 @@
             jQuery.noConflict();
             $('#download').modal('hide');
             $('#downloadStatus').modal('hide');
-
+            
             $.ajax({
                 url: url + '/' + duration,
                 type:"GET",
@@ -364,7 +364,7 @@
                     $('#downloadStatus').modal('show');
                 }
             });
-
+                        
         });
 
         $(document).on("click", ".displaySummary", function () {
