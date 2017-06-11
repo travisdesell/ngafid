@@ -43,12 +43,15 @@
         <li><a href="{{ url('import/status') }}">Import Status/History</a></li>
     </ul>
 </li>
-@if(Auth::user()->org_id == 1 || Auth::user()->org_id == 89)
-<li  class="dropdown">
-    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Stabilized Approach<span class="caret"></span></a>
-    <ul class="dropdown-menu" role="menu">
+
+    <li  class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Approach Analysis<span class="caret"></span></a>
+        <ul class="dropdown-menu" role="menu">
         <!--<li><a href="{{ url('approach/index') }}">Info...</a></li>-->
-        <li><a href="{{ url('approach/analysis') }}">Analysis</a></li>
-    </ul>
-</li>
-@endif
+            @if(Auth::user()->org_id == 1 || Auth::user()->org_id == 89)
+            <li><a href="{{ url('approach/analysis') }}">Stabilized Approach</a></li>
+            @endif
+            <li><a href="{{ url('approach/selfdefined') }}">Self Defined</a></li>
+        </ul>
+
+    </li>

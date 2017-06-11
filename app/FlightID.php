@@ -27,9 +27,17 @@ class FlightID extends Model {
         return $this->belongsTo('NGAFID\Fleet', 'fleet_id');
     }
 
+    public function aircraft() {
+        return $this->hasOne('NGAFID\Aircraft', 'id', 'aircraft_type');
+    }
+
     public function mainTableData()
     {
         return $this->hasMany('NGAFID\Main', 'flight');
+    }
+
+    public function selfDefinedApproaches() {
+        return $this->hasMany('NGAFID\SelfDefinedApproach', 'flight', 'id');
     }
 
     public function scopeFlightDetails($query, $fleet, $startDate = null, $endDate = null, $archived = '', $sort = null, $column = null, $duration = '00:00', $flightID = '')
