@@ -98,27 +98,41 @@ class ProcessImportCommand extends Command implements SelfHandling, ShouldBeQueu
 
 	}
 
-    public function loadDataIntoDB($flightID){
+    public function loadDataIntoDB($flightID) {
         //create temporary table and insert the data
         $tmpTable = $flightID . '_main_tmp';
         \DB::statement('DROP TEMPORARY TABLE IF EXISTS `fdm_test`.`' . $tmpTable . '`');
         \DB::statement('CREATE TEMPORARY TABLE `fdm_test`.`' . $tmpTable . '` LIKE `fdm_test`.main');
 
+        $aircraftID = $this->upload->aircraft_type;
+
         $sql  = "LOAD DATA LOCAL INFILE '%s' INTO TABLE `fdm_test`.`" . $tmpTable . "` FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ESCAPED BY '\"' LINES TERMINATED BY '\\n' IGNORE 1 LINES ";
-        if($this->upload->aircraft_type == 1)
-        {
+        if ($aircraftID == 1) {  // Cessna 172
             $sql .= " (time, radio_altitude_derived, @dummy, @dummy, latitude, longitude, altimeter, msl_altitude, oat, indicated_airspeed, groundspeed, vertical_airspeed, pitch_attitude, roll_attitude,";
             $sql .= " lateral_acceleration, vertical_acceleration, heading, course, system_1_volts, system_2_volts, system_1_amps, system_2_amps, fuel_quantity_left_main, fuel_quantity_right_main,";
             $sql .= " eng_1_fuel_flow, eng_1_oil_temp, eng_1_oil_press, eng_1_rpm, eng_1_cht_1, eng_1_cht_2, eng_1_cht_3, eng_1_cht_4, eng_1_egt_1, eng_1_egt_2, eng_1_egt_3, eng_1_egt_4, tas, obs_1,";
             $sql .= " nav_1_freq, nav_2_freq)";
-        }
-        elseif($this->upload->aircraft_type == 2)
-        {
+        } elseif ($aircraftID == 2) {  // Cessna 182
             $sql .= " (time, radio_altitude_derived, @dummy, @dummy, latitude, longitude, altimeter, msl_altitude, oat, indicated_airspeed, groundspeed, vertical_airspeed, pitch_attitude, roll_attitude,";
             $sql .= " lateral_acceleration, vertical_acceleration, heading, course, system_1_volts, system_2_volts, system_1_amps, system_2_amps, fuel_quantity_left_main, fuel_quantity_right_main,";
             $sql .= " eng_1_fuel_flow, eng_1_oil_temp, eng_1_oil_press, eng_1_mp, eng_1_rpm, eng_1_cht_1, eng_1_cht_2, eng_1_cht_3, eng_1_cht_4, eng_1_cht_5, eng_1_cht_6,";
             $sql .= " eng_1_egt_1, eng_1_egt_2, eng_1_egt_3, eng_1_egt_4, eng_1_egt_5, eng_1_egt_6, tas, obs_1, nav_1_freq, nav_2_freq)";
+        } elseif ($aircraftID == 6) {  // Piper Seminole PA44
+            $sql .= " (time, radio_altitude_derived, @dummy, @dummy, latitude, longitude, altimeter, msl_altitude, oat, indicated_airspeed, groundspeed, vertical_airspeed, pitch_attitude, roll_attitude,";
+            $sql .= " lateral_acceleration, vertical_acceleration, heading, course, system_1_volts, system_1_amps, fuel_quantity_left_main, fuel_quantity_right_main,";
+            $sql .= " eng_1_fuel_flow, eng_1_oil_temp, eng_1_oil_press, eng_1_mp, eng_1_rpm, eng_1_cht_1, eng_1_egt_1, eng_1_egt_2, eng_1_egt_3, eng_1_egt_4,";
+            $sql .= " eng_2_fuel_flow, eng_2_oil_temp, eng_2_oil_press, eng_2_mp, eng_2_rpm, eng_2_cht_1, eng_2_egt_1, eng_2_egt_2, eng_2_egt_3, eng_2_egt_4,";
+            $sql .= " tas, obs_1, nav_1_freq, nav_2_freq)";
+        } elseif ($aircraftID == 7) {  // Piper Archer PA28
+            $sql .= " (time, radio_altitude_derived, @dummy, @dummy, latitude, longitude, altimeter, msl_altitude, oat, indicated_airspeed, groundspeed, vertical_airspeed, pitch_attitude, roll_attitude,";
+            $sql .= " lateral_acceleration, vertical_acceleration, heading, course, system_1_volts, system_1_amps, fuel_quantity_left_main, fuel_quantity_right_main,";
+            $sql .= " eng_1_fuel_flow, eng_1_oil_temp, eng_1_oil_press, eng_1_rpm, eng_1_egt_1, eng_1_egt_2, eng_1_egt_3, eng_1_egt_4, tas, obs_1, nav_1_freq, nav_2_freq)";
+        } elseif ($aircraftID == 8){  // Cirrus SR20
+            $sql .= " (time, radio_altitude_derived, @dummy, @dummy, latitude, longitude, altimeter, msl_altitude, oat, indicated_airspeed, groundspeed, vertical_airspeed, pitch_attitude, roll_attitude,";
+            $sql .= " lateral_acceleration, vertical_acceleration, heading, course, system_1_volts, system_2_volts, system_1_amps, eng_1_fuel_flow, eng_1_oil_temp, eng_1_oil_press, eng_1_mp, eng_1_rpm,";
+            $sql .= " eng_1_cht_1, eng_1_cht_2, eng_1_cht_3, eng_1_cht_4, eng_1_cht_5, eng_1_cht_6, eng_1_egt_1, eng_1_egt_2, eng_1_egt_3, eng_1_egt_4, eng_1_egt_5, eng_1_egt_6, tas, obs_1, nav_1_freq, nav_2_freq)";
         }
+
         $sql .= "SET phase = 0, flight = " . $flightID;
 
         $sql = sprintf($sql, addslashes($this->newFilePath));
@@ -135,7 +149,6 @@ class ProcessImportCommand extends Command implements SelfHandling, ShouldBeQueu
         $this->upload->save();
 
         \DB::statement('DROP TEMPORARY TABLE IF EXISTS `fdm_test`.`' . $tmpTable . '`');
-
     }
 
     public function transferToMainTable($flightID, $tmpTableName){
@@ -261,15 +274,14 @@ class ProcessImportCommand extends Command implements SelfHandling, ShouldBeQueu
         return $flight;
     }
 
-    public function createTempFile()
-    {
+    public function createTempFile() {
         //create a temporary copy of the file for manipulation
         $orgFileName        = $this->upload->path . $this->upload->file_name;
         $newFileName        = $this->upload->path . 'tmp_' . $this->upload->file_name;
         $this->newFilePath  = $newFileName;
         $aircraft           = $this->upload->aircraft_type;
 
-        if($aircraft == 1) {
+        if ($aircraft == 1) {  // Cessna 172
             $origHeader  = 'Lcl Date,Lcl Time,UTCOfst,AtvWpt,Latitude,Longitude,AltB,BaroA,AltMSL,OAT,IAS,GndSpd,';
             $origHeader .= 'VSpd,Pitch,Roll,LatAc,NormAc,HDG,TRK,volt1,volt2,amp1,amp2,FQtyL,FQtyR,E1 FFlow,';
             $origHeader .= 'E1 OilT,E1 OilP,E1 RPM,E1 CHT1,E1 CHT2,E1 CHT3,E1 CHT4,E1 EGT1,E1 EGT2,E1 EGT3,E1 EGT4,';
@@ -281,8 +293,7 @@ class ProcessImportCommand extends Command implements SelfHandling, ShouldBeQueu
             $newHeader  .= 'E1 CHT1,E1 CHT2,E1 CHT3,E1 CHT4,E1 EGT1,E1 EGT2,E1 EGT3,E1 EGT4,TAS,CRS,NAV1,NAV2';
 
             $this->newFileHeaders = $newHeader;
-        }
-        elseif($aircraft == 2) {
+        } elseif ($aircraft == 2) {  // Cessna 182
             $origHeader  = 'Lcl Date,Lcl Time,UTCOfst,AtvWpt,Latitude,Longitude,AltB,BaroA,AltMSL,OAT,IAS,GndSpd,';
             $origHeader .= 'VSpd,Pitch,Roll,LatAc,NormAc,HDG,TRK,volt1,volt2,amp1,amp2,FQtyL,FQtyR,E1 FFlow,';
             $origHeader .= 'E1 OilT,E1 OilP,E1 MAP,E1 RPM,E1 CHT1,E1 CHT2,E1 CHT3,E1 CHT4,E1 CHT5,E1 CHT6,';
@@ -296,8 +307,40 @@ class ProcessImportCommand extends Command implements SelfHandling, ShouldBeQueu
             $newHeader  .= 'TAS,CRS,NAV1,NAV2';
 
             $this->newFileHeaders = $newHeader;
-        }
-        else{
+        } elseif ($aircraft == 6) {  // Piper Seminole PA44
+            $origHeader  = 'Lcl Date,Lcl Time,UTCOfst,AtvWpt,Latitude,Longitude,AltB,BaroA,AltMSL,OAT,IAS,GndSpd,VSpd,Pitch,Roll,';
+            $origHeader .= 'LatAc,NormAc,HDG,TRK,volt1,amp1,FQtyL,FQtyR,E1 FFlow,E1 OilT,E1 OilP,E1 MAP,E1 RPM,E1 CHT1,E1 EGT1,E1 EGT2,';
+            $origHeader .= 'E1 EGT3,E1 EGT4,E2 FFlow,E2 OilT,E2 OilP,E2 MAP,E2 RPM,E2 CHT1,E2 EGT1,E2 EGT2,E2 EGT3,E2 EGT4,AltGPS,TAS,';
+            $origHeader .= 'HSIS,CRS,NAV1,NAV2,COM1,COM2,HCDI,VCDI,WndSpd,WndDr,WptDst,WptBrg,MagVar,AfcsOn,RollM,PitchM,RollC,PichC,VSpdG,';
+            $origHeader .= 'GPSfix,HAL,VAL,HPLwas,HPLfd,VPLwas';
+
+            $newHeader   = 'Lcl Date,Lcl Time,Latitude,Longitude,BaroA,AltMSL,OAT,IAS,GndSpd,VSpd,Pitch,Roll,LatAc,NormAc,HDG,TRK,volt1,amp1,FQtyL,FQtyR,';
+            $newHeader  .= 'E1 FFlow,E1 OilT,E1 OilP,E1 MAP,E1 RPM,E1 CHT1,E1 EGT1,E1 EGT2,E1 EGT3,E1 EGT4,';
+            $newHeader  .= 'E2 FFlow,E2 OilT,E2 OilP,E2 MAP,E2 RPM,E2 CHT1,E2 EGT1,E2 EGT2,E2 EGT3,E2 EGT4,TAS,CRS,NAV1,NAV2';
+
+            $this->newFileHeaders = $newHeader;
+        } elseif ($aircraft == 7) {  // Piper Archer PA28
+            $origHeader  = 'Lcl Date,Lcl Time,UTCOfst,AtvWpt,Latitude,Longitude,AltB,BaroA,AltMSL,OAT,IAS,GndSpd,VSpd,Pitch,Roll,';
+            $origHeader .= 'LatAc,NormAc,HDG,TRK,volt1,amp1,FQtyL,FQtyR,E1 FFlow,E1 OilT,E1 OilP,E1 RPM,E1 EGT1,E1 EGT2,E1 EGT3,E1 EGT4,';
+            $origHeader .= 'AltGPS,TAS,HSIS,CRS,NAV1,NAV2,COM1,COM2,HCDI,VCDI,WndSpd,WndDr,WptDst,WptBrg,MagVar,AfcsOn,RollM,PitchM,RollC,';
+            $origHeader .= 'PichC,VSpdG,GPSfix,HAL,VAL,HPLwas,HPLfd,VPLwas';
+
+            $newHeader  = 'Lcl Date,Lcl Time,Latitude,Longitude,BaroA,AltMSL,OAT,IAS,GndSpd,VSpd,Pitch,Roll,LatAc,NormAc,HDG,TRK,volt1,amp1,';
+            $newHeader .= 'FQtyL,FQtyR,E1 FFlow,E1 OilT,E1 OilP,E1 RPM,E1 EGT1,E1 EGT2,E1 EGT3,E1 EGT4,TAS,CRS,NAV1,NAV2';
+
+            $this->newFileHeaders = $newHeader;
+        } elseif ($aircraft == 8) {  // Cirrus SR20
+            $origHeader  = 'Lcl Date,Lcl Time,UTCOfst,AtvWpt,Latitude,Longitude,AltB,BaroA,AltMSL,OAT,IAS,GndSpd,VSpd,Pitch,Roll,';
+            $origHeader .= 'LatAc,NormAc,HDG,TRK,volt1,volt2,amp1,E1 FFlow,E1 OilT,E1 OilP,E1 MAP,E1 RPM,E1 CHT1,E1 CHT2,E1 CHT3,E1 CHT4,E1 CHT5,E1 CHT6,';
+            $origHeader .= 'E1 EGT1,E1 EGT2,E1 EGT3,E1 EGT4,E1 EGT5,E1 EGT6,AltGPS,TAS,HSIS,CRS,NAV1,NAV2,COM1,COM2,HCDI,VCDI,WndSpd,WndDr,WptDst,WptBrg,';
+            $origHeader .= 'MagVar,AfcsOn,RollM,PitchM,RollC,PichC,VSpdG,GPSfix,HAL,VAL,HPLwas,HPLfd,VPLwas';
+
+            $newHeader   = 'Lcl Date,Lcl Time,Latitude,Longitude,BaroA,AltMSL,OAT,IAS,GndSpd,VSpd,Pitch,Roll,LatAc,NormAc,HDG,TRK,volt1,volt2,amp1,';
+            $newHeader  .= 'E1 FFlow,E1 OilT,E1 OilP,E1 MAP,E1 RPM,E1 CHT1,E1 CHT2,E1 CHT3,E1 CHT4,E1 CHT5,E1 CHT6,E1 EGT1,E1 EGT2,E1 EGT3,E1 EGT4,E1 EGT5,E1 EGT6,';
+            $newHeader  .= 'TAS,CRS,NAV1,NAV2';
+
+            $this->newFileHeaders = $newHeader;
+        } else {
             //unable to import, unknown file/headers for automatic import
             $this->upload->import_notes = 'Unable to import the selected aircraft data. Error Type: Unknown CSV headers';
             $this->upload->error = 1;

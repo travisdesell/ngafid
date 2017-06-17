@@ -69,7 +69,7 @@ class ImportController extends Controller {
     public function upload()
     {
         $aircraftTable = new Aircraft();
-        $aircraftInfo = $aircraftTable->whereIn('id', [1, 2])->orderBy('aircraft name', 'ASC')->get(); //only show C172 and C182
+        $aircraftInfo = $aircraftTable->whereIn('id', [1, 2, 6, 7, 8])->orderBy('aircraft name', 'ASC')->get();  // only show C172, C182, PA44, PA28, SR20
 
         $aircraftData[''] = 'Select Aircraft';
         foreach($aircraftInfo as $aircraft)

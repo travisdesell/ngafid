@@ -17,8 +17,7 @@ class Main extends Model{
     {
         return $query->select(\DB::raw($parameters))
                     ->where('flight', '=', $flightID)
-                    ->orderBy('time_sec', 'ASC')
-                    ->groupBy('time_sec');
+                    ->orderBy('time', 'ASC');
     }
 
     public function scopeFlightSummary($query, $flightID)
