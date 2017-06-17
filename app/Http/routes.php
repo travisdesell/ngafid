@@ -49,6 +49,9 @@ Route::get('approach/chart/', 'StabilizedApproach\StabilizedApproachController@c
 Route::get('approach/airports/', 'StabilizedApproach\StabilizedApproachController@airports');
 Route::get('approach/runways/', 'StabilizedApproach\StabilizedApproachController@runways');
 
+Route::get('dbx', 'DropboxAuthController@index');
+Route::post('dbx', 'DropboxAuthController@store');
+
 Route::controllers([
 	'auth' => 'Auth\AuthController',
 	'password' => 'Auth\PasswordController',
