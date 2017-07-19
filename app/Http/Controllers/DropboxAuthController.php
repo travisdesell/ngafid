@@ -7,6 +7,7 @@ use NGAFID\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Contracts\Auth\Authenticatable;
 
+use Mail;
 use Storage;
 
 class DropboxAuthController extends Controller {
@@ -69,7 +70,20 @@ class DropboxAuthController extends Controller {
 
         Storage::put($filename, $access_token);
 
-        flash()->success('Dropbox authentication was successfull!');
+        flash()->success('Dropbox authentication was successful!');
+
+	$emailData = [
+		'fullname' => "{$user->firstname} {$user->lastname}",
+		'user_email' => $user->email,
+		'user_id' => $user_id,
+		'org_id' => $org_id,
+		'org_name' => $org_name,
+		'filename' => $filename,
+	];
+
+	Mail::send('emails.dbx_auth_success', $emailData, function ($message) {
+		$message->to('kelton.karboviak@und.edu', 'Kelton Karboviak')->subject('New Successful Dropbox Authorization!');
+	});
 
         return redirect()->back();
     }
