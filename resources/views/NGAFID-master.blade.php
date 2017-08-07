@@ -50,7 +50,7 @@
 							<ul class="dropdown-menu" role="menu">
                                 <li><a href="{{ url('/profile') }}">My Account</a></li>
                                 <li><a href="{{ url('/faq') }}">FAQ's</a></li>
-                                <li><a href="mailto:jhiggins@aero.und.edu">Contact Us</a></li>
+                                <li><a href="mailto:dusenbur@aero.und.edu?cc=bwild@aero.und.edu;kelton.karboviak@und.edu">Contact Us</a></li>
 								<li><a href="{{ url('/auth/logout') }}">Logout</a></li>
 							</ul>
 						</li>
