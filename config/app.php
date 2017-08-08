@@ -137,9 +137,9 @@ return [
         'Illuminate\Validation\ValidationServiceProvider',
         'Illuminate\View\ViewServiceProvider',
 
-        'Laracasts\Flash\FlashServiceProvider',                                                    // added on 05/15/15
-        'Msurguy\Honeypot\HoneypotServiceProvider',                                                // added on 06/06/15
-        'Collective\Html\HtmlServiceProvider',                                                     // added on 06/15/17
+        'Laracasts\Flash\FlashServiceProvider',            // added on 05/15/15
+        'Msurguy\Honeypot\HoneypotServiceProvider',        // added on 06/06/15
+        'Collective\Html\HtmlServiceProvider',             // added on 06/15/17
 
         /*
          * Application Service Providers...
@@ -198,10 +198,10 @@ return [
         'Validator' => 'Illuminate\Support\Facades\Validator',
         'View'      => 'Illuminate\Support\Facades\View',
 
-        'Flash'     => 'Laracasts\Flash\Flash',                                                     // added on 05/15/15
-        'Honeypot'  => 'Msurguy\Honeypot\HoneypotFacade',                                           // added on 06/06/15
-        'Form'      => 'Collective\Html\FormFacade',                                                // added on 06/15/17
-        'Html'      => 'Coolective\Html\HtmlFacade',                                                // added on 06/15/17
+        'Flash'    => 'Laracasts\Flash\Flash',            // added on 05/15/15
+        'Honeypot' => 'Msurguy\Honeypot\HoneypotFacade',  // added on 06/06/15
+        'Form'     => 'Collective\Html\FormFacade',       // added on 06/15/17
+        'Html'     => 'Coolective\Html\HtmlFacade',       // added on 06/15/17
 
     ],
 
