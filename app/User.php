@@ -1,15 +1,15 @@
-<?php namespace NGAFID;
+<?php
+namespace NGAFID;
 
+use Eloquent;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
-use Illuminate\Database\Eloquent\Model;
 
-
-class User extends Model
-    implements AuthenticatableContract, CanResetPasswordContract {
-
+class User extends Eloquent
+    implements AuthenticatableContract, CanResetPasswordContract
+{
     use Authenticatable, CanResetPassword;
 
     /**
@@ -47,7 +47,17 @@ class User extends Model
      * Model Eloquent Relationships
      */
 
-    public function fleet() {
+    public function fleet()
+    {
         return $this->belongsTo('NGAFID\Fleet', 'org_id', 'id');
+    }
+
+    /*************************************************************************
+     * Public Methods
+     */
+
+    public function isFleetAdministrator()
+    {
+        return $this->id === $this->fleet->administrator;
     }
 }

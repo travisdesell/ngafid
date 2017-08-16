@@ -1,4 +1,5 @@
-<?php namespace NGAFID\Http\Controllers\Profile;
+<?php
+namespace NGAFID\Http\Controllers\Profile;
 
 
 use NGAFID\Http\Controllers\Controller;
@@ -33,7 +34,6 @@ class ProfileController extends Controller {
 
         $user = new User();
         $fleetInfo = $user->find(\Auth::user()->id)->fleet;
-
 
         $userData = array(
             'firstname'     => \Auth::user()->firstname,

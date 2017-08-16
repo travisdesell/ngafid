@@ -1,10 +1,10 @@
-<?php namespace NGAFID;
+<?php
+namespace NGAFID;
 
-use Illuminate\Database\Eloquent\Model;
+use Eloquent;
 
-
-class Fleet extends Model {
-
+class Fleet extends Eloquent
+{
     /**
      * The database table used by the model.
      *
@@ -26,13 +26,15 @@ class Fleet extends Model {
         'country',
         'phone',
         'fax',
+        'encrypt_data',
     ];
 
     /*************************************************************************-
      * Model Scopes
      */
 
-    public function scopeDuration($query, $fleetID) {
+    public function scopeDuration($query, $fleetID)
+    {
         return $query->where('fleet_id', '=', $fleetID);
     }
 
@@ -40,23 +42,27 @@ class Fleet extends Model {
      * Model Eloquent Relationships
      */
 
-    public function users() {
+    public function users()
+    {
         return $this->hasMany('NGAFID\User', 'org_id', 'id');
     }
 
-    public function flights() {
+    public function flights()
+    {
         return $this->hasMany('NGAFID\FlightID');
     }
 
     /*************************************************************************
-     * Public functions
+     * Public Methods
      */
 
-    public function wantsDataEncrypted() {
+    public function wantsDataEncrypted()
+    {
         return $this->encrypt_data === 'Y';
     }
 
-    public function isUND() {
+    public function isUND()
+    {
         return $this->id === 1 || $this->id === 3;
     }
 }

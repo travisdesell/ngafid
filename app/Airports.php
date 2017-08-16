@@ -1,10 +1,9 @@
-<?php namespace NGAFID;
+<?php
+namespace NGAFID;
 
-use Illuminate\Auth\Authenticatable;
-use Illuminate\Database\Eloquent\Model;
+use Eloquent;
 
-
-class Airports extends Model {
-
+class Airports extends Eloquent
+{
     protected $table = 'airports';
 }

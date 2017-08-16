@@ -1,27 +1,32 @@
-<?php namespace NGAFID;
+<?php
+namespace NGAFID;
 
-use Illuminate\Auth\Authenticatable;
-use Illuminate\Database\Eloquent\Model;
+use Eloquent;
 
-
-class StabilizedApproach extends Model {
-
+class StabilizedApproach extends Eloquent
+{
     protected $table = 'stabilized_approach';
+
     protected $maxVal = 30;
+
     protected $minVal = 20;
+
     protected $slowSpd = -5;
+
     protected $fastSpd = 10;
+
     protected $lowHAT = -5;
+
     protected $highHAT = 10;
 
     public function scopeApproachData($query, $fleet, $runway, $params, $date)
     {
-        $date  = explode('-', $date);
+        $date = explode('-', $date);
         $month = $date[1];
-        $year  = $date[0];
+        $year = $date[0];
 
-        switch($params){
-            //cross track error
+        switch ($params) {
+            // cross track error
             case 'CTE':
                 $fields = "avgCrsTrk,
                             CASE
@@ -62,52 +67,59 @@ class StabilizedApproach extends Model {
                 break;
         }
 
-        //echo $query->toSql();
-
-         return $query->select(\DB::raw("id AS 'rowID', nNumber, flight, fltDate, timeOfFinal,
-                {$fields},
+        return $query->select(
+            \DB::raw(
+                "id AS 'rowID', nNumber, flight, fltDate, timeOfFinal,
+                $fields,
                 @tot:= (SELECT  COUNT(*)
                     FROM    stabilized_approach t2
                     WHERE   t2.flight = stabilized_approach.flight AND t2.airport_id = {$runway}
                 ) AS 'total',
                 @ctr:= IFNULL(@ctr, 0) + 1 AS 'apprNo',
-	            IF (@ctr >= @tot, @ctr:= 0, @ctr:= @ctr)"))
+	            IF (@ctr >= @tot, @ctr:= 0, @ctr:= @ctr)"
+            )
+        )
             ->where('fleet_id', '=', $fleet)
             ->where('airport_id', '=', $runway)
             ->whereRaw("YEAR(fltDate) = {$year}")
             ->whereRaw("MONTH(fltDate) = {$month}")
             ->orderBy('flight', 'ASC')
             ->orderBy('timeOfFinal', 'ASC');
-
     }
 
-    public function scopeGraphApproach($query, $flight, $flightTime, $start, $end)
-    {
-        return \DB::select(\DB::raw(
-            "SELECT AddTime('{$flightTime}', COALESCE(SEC_TO_TIME(FLOOR(time/1000)), 0)) AS time_sec,
-                roll_attitude AS roll,
-                CASE
-                    WHEN roll_attitude < 30 THEN 'rgba(0, 153, 151, .7)'
-                    WHEN roll_attitude > 30 AND roll_attitude < 40 THEN 'rgba(255, 204, 0, .7)'
-                    ELSE 'rgba(223, 83, 83, .7)'
-                END AS 'roll_color',
-                pitch_attitude AS pitch,
-                'black' AS 'pitch_color',
-                indicated_airspeed AS ias,
-                CASE
-                    WHEN indicated_airspeed > 70 THEN 'red'
-                    WHEN indicated_airspeed > 65 THEN 'yellow'
-                    ELSE 'green'
-                END AS 'ias_color',
-                vertical_airspeed AS vsi,
-                CASE
-                    WHEN vertical_airspeed < -1000 THEN 'red'
-                    ELSE 'green'
-                END AS 'vsi_color'
-            FROM main
-            WHERE flight = {$flight}
-              AND `time` BETWEEN {$start} AND {$end}
-            ORDER BY time_sec ASC;"
-        ));
+    public function scopeGraphApproach(
+        $query,
+        $flight,
+        $flightTime,
+        $start,
+        $end
+    ) {
+        return \DB::select(
+            \DB::raw(
+                "SELECT AddTime('{$flightTime}', COALESCE(SEC_TO_TIME(FLOOR(time/1000)), 0)) AS time_sec, roll_attitude AS roll,
+                    CASE
+                        WHEN roll_attitude < 30 THEN 'rgba(0, 153, 151, .7)'
+                        WHEN roll_attitude > 30 AND roll_attitude < 40 THEN 'rgba(255, 204, 0, .7)'
+                        ELSE 'rgba(223, 83, 83, .7)'
+                    END AS 'roll_color',
+                    pitch_attitude AS pitch,
+                    'black' AS 'pitch_color',
+                    indicated_airspeed AS ias,
+                    CASE
+                        WHEN indicated_airspeed > 70 THEN 'red'
+                        WHEN indicated_airspeed > 65 THEN 'yellow'
+                        ELSE 'green'
+                    END AS 'ias_color',
+                    vertical_airspeed AS vsi,
+                    CASE
+                        WHEN vertical_airspeed < -1000 THEN 'red'
+                        ELSE 'green'
+                    END AS 'vsi_color'
+                FROM main
+                WHERE flight = {$flight}
+                  AND `time` BETWEEN {$start} AND {$end}
+                ORDER BY time_sec ASC;"
+            )
+        );
     }
 }
