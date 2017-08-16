@@ -137,9 +137,12 @@ return [
         'Illuminate\Validation\ValidationServiceProvider',
         'Illuminate\View\ViewServiceProvider',
 
-        'Laracasts\Flash\FlashServiceProvider',            // added on 05/15/15
-        'Msurguy\Honeypot\HoneypotServiceProvider',        // added on 06/06/15
-        'Collective\Html\HtmlServiceProvider',             // added on 06/15/17
+        // added on 05/15/15
+        'Laracasts\Flash\FlashServiceProvider',
+        // added on 06/06/15
+        'Msurguy\Honeypot\HoneypotServiceProvider',
+        // added on 06/15/17
+        'Collective\Html\HtmlServiceProvider',
 
         /*
          * Application Service Providers...

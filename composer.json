@@ -13,7 +13,9 @@
     },
     "require-dev": {
         "phpunit/phpunit": "~4.0",
-        "phpspec/phpspec": "~2.1"
+        "phpspec/phpspec": "~2.1",
+        "barryvdh/laravel-ide-helper": "^2.4",
+        "doctrine/dbal": "^2.5"
     },
     "autoload": {
         "classmap": [
@@ -34,7 +36,9 @@
             "php artisan optimize"
         ],
         "post-update-cmd": [
-            "php artisan clear-compiled",
+            "Illuminate\\Foundation\\ComposerScripts::postUpdate",
+            "php artisan ide-helper:generate",
+            "php artisan ide-helper:meta",
             "php artisan optimize"
         ],
         "post-create-project-cmd": [
