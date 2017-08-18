@@ -68,8 +68,9 @@ class ImportController extends Controller {
 
     public function upload()
     {
+        // Only show C172S, C182, Piper Seminole PA44, Piper Archer PA28, Cirrus SR20
         $aircraftTable = new Aircraft();
-        $aircraftInfo = $aircraftTable->whereIn('id', [1, 2])->orderBy('aircraft name', 'ASC')->get(); //only show C172 and C182
+        $aircraftInfo = $aircraftTable->whereIn('id', [1, 2, 6, 7, 8, 192])->orderBy('aircraft name', 'ASC')->get();
 
         $aircraftData[''] = 'Select Aircraft';
         foreach($aircraftInfo as $aircraft)

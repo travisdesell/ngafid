@@ -1,5 +1,7 @@
 <?php namespace NGAFID\Commands;
 ini_set("memory_limit","10240M");
+
+use League\Flysystem\Exception;
 use NGAFID\Commands\Command;
 
 use Illuminate\Queue\SerializesModels;
@@ -44,9 +46,11 @@ class ProcessImportCommand extends Command implements SelfHandling, ShouldBeQueu
         $validFile = $this->createTempFile(); //make a copy of the CSV
         if($validFile == 1)
         {
-            //error found with the file. stop processing
+            // Error found with the file. stop processing
             \File::delete($this->newFilePath);
-            return;
+
+            // Throw an exception so job will be added to failed_jobs
+            throw new Exception('Flight was found to be invalid after creating the temporary file.');
         }
 
         if($this->csvRowCtr > 0) {
@@ -94,6 +98,9 @@ class ProcessImportCommand extends Command implements SelfHandling, ShouldBeQueu
             $this->upload->import_time = \DB::RAW('NOW()');
             $this->upload->save();
             \File::delete($this->newFilePath);
+
+            // Throw an exception so job will be added to failed_jobs
+            throw new Exception('Unsupported file format.  Error Type: Invalid flight data, 0 valid rows found in CSV.');
         }
 
 	}
@@ -118,6 +125,32 @@ class ProcessImportCommand extends Command implements SelfHandling, ShouldBeQueu
             $sql .= " lateral_acceleration, vertical_acceleration, heading, course, system_1_volts, system_2_volts, system_1_amps, system_2_amps, fuel_quantity_left_main, fuel_quantity_right_main,";
             $sql .= " eng_1_fuel_flow, eng_1_oil_temp, eng_1_oil_press, eng_1_mp, eng_1_rpm, eng_1_cht_1, eng_1_cht_2, eng_1_cht_3, eng_1_cht_4, eng_1_cht_5, eng_1_cht_6,";
             $sql .= " eng_1_egt_1, eng_1_egt_2, eng_1_egt_3, eng_1_egt_4, eng_1_egt_5, eng_1_egt_6, tas, obs_1, nav_1_freq, nav_2_freq)";
+        }
+        elseif ($this->upload->aircraft_type == 6)
+        {  // Piper Seminole PA44
+            $sql .= " (time, radio_altitude_derived, @dummy, @dummy, latitude, longitude, altimeter, msl_altitude, oat, indicated_airspeed, groundspeed, vertical_airspeed, pitch_attitude, roll_attitude,";
+            $sql .= " lateral_acceleration, vertical_acceleration, heading, course, system_1_volts, system_1_amps, fuel_quantity_left_main, fuel_quantity_right_main,";
+            $sql .= " eng_1_fuel_flow, eng_1_oil_temp, eng_1_oil_press, eng_1_mp, eng_1_rpm, eng_1_cht_1, eng_1_egt_1, eng_1_egt_2, eng_1_egt_3, eng_1_egt_4,";
+            $sql .= " eng_2_fuel_flow, eng_2_oil_temp, eng_2_oil_press, eng_2_mp, eng_2_rpm, eng_2_cht_1, eng_2_egt_1, eng_2_egt_2, eng_2_egt_3, eng_2_egt_4,";
+            $sql .= " tas, obs_1, nav_1_freq, nav_2_freq)";
+        }
+        elseif ($this->upload->aircraft_typeD == 7)
+        {  // Piper Archer PA28
+            $sql .= " (time, radio_altitude_derived, @dummy, @dummy, latitude, longitude, altimeter, msl_altitude, oat, indicated_airspeed, groundspeed, vertical_airspeed, pitch_attitude, roll_attitude,";
+            $sql .= " lateral_acceleration, vertical_acceleration, heading, course, system_1_volts, system_1_amps, fuel_quantity_left_main, fuel_quantity_right_main,";
+            $sql .= " eng_1_fuel_flow, eng_1_oil_temp, eng_1_oil_press, eng_1_rpm, eng_1_egt_1, eng_1_egt_2, eng_1_egt_3, eng_1_egt_4, tas, obs_1, nav_1_freq, nav_2_freq)";
+        }
+        elseif ($this->upload->aircraft_type == 8)
+        {  // Cirrus SR20
+            $sql .= " (time, radio_altitude_derived, @dummy, @dummy, latitude, longitude, altimeter, msl_altitude, oat, indicated_airspeed, groundspeed, vertical_airspeed, pitch_attitude, roll_attitude,";
+            $sql .= " lateral_acceleration, vertical_acceleration, heading, course, system_1_volts, system_2_volts, system_1_amps, eng_1_fuel_flow, eng_1_oil_temp, eng_1_oil_press, eng_1_mp, eng_1_rpm,";
+            $sql .= " eng_1_cht_1, eng_1_cht_2, eng_1_cht_3, eng_1_cht_4, eng_1_cht_5, eng_1_cht_6, eng_1_egt_1, eng_1_egt_2, eng_1_egt_3, eng_1_egt_4, eng_1_egt_5, eng_1_egt_6, tas, obs_1, nav_1_freq, nav_2_freq)";
+        }
+        elseif ($this->upload->aircraft_type == 192)
+        {  // Piper Malibu PA46
+            $sql .= " (time, radio_altitude_derived, @dummy, @dummy, latitude, longitude, altimeter, msl_altitude, oat, indicated_airspeed, groundspeed, vertical_airspeed, pitch_attitude, roll_attitude,";
+            $sql .= " lateral_acceleration, vertical_acceleration, heading, course, system_1_volts, system_1_amps, fuel_quantity_left_main, fuel_quantity_right_main,";
+            $sql .= " eng_1_fuel_flow, eng_1_oil_temp, eng_1_oil_press, tas, obs_1, nav_1_freq, nav_2_freq)";
         }
         $sql .= "SET phase = 0, flight = " . $flightID;
 
@@ -279,8 +312,6 @@ class ProcessImportCommand extends Command implements SelfHandling, ShouldBeQueu
             $newHeader   = 'Lcl Date,Lcl Time,Latitude,Longitude,BaroA,AltMSL,OAT,IAS,GndSpd,VSpd,Pitch,Roll,';
             $newHeader  .= 'LatAc,NormAc,HDG,TRK,volt1,volt2,amp1,amp2,FQtyL,FQtyR,E1 FFlow,E1 OilT,E1 OilP,E1 RPM,';
             $newHeader  .= 'E1 CHT1,E1 CHT2,E1 CHT3,E1 CHT4,E1 EGT1,E1 EGT2,E1 EGT3,E1 EGT4,TAS,CRS,NAV1,NAV2';
-
-            $this->newFileHeaders = $newHeader;
         }
         elseif($aircraft == 2) {
             $origHeader  = 'Lcl Date,Lcl Time,UTCOfst,AtvWpt,Latitude,Longitude,AltB,BaroA,AltMSL,OAT,IAS,GndSpd,';
@@ -294,8 +325,45 @@ class ProcessImportCommand extends Command implements SelfHandling, ShouldBeQueu
             $newHeader  .= 'LatAc,NormAc,HDG,TRK,volt1,volt2,amp1,amp2,FQtyL,FQtyR,E1 FFlow,E1 OilT,E1 OilP,E1 MAP,E1 RPM,';
             $newHeader  .= 'E1 CHT1,E1 CHT2,E1 CHT3,E1 CHT4,E1 CHT5,E1 CHT6,E1 EGT1,E1 EGT2,E1 EGT3,E1 EGT4,E1 EGT5,E1 EGT6,';
             $newHeader  .= 'TAS,CRS,NAV1,NAV2';
+        }
+        elseif($aircraft == 6) {  // Piper Seminole PA44
+            $origHeader = 'Lcl Date,Lcl Time,UTCOfst,AtvWpt,Latitude,Longitude,AltB,BaroA,AltMSL,OAT,IAS,GndSpd,VSpd,Pitch,Roll,';
+            $origHeader .= 'LatAc,NormAc,HDG,TRK,volt1,amp1,FQtyL,FQtyR,E1 FFlow,E1 OilT,E1 OilP,E1 MAP,E1 RPM,E1 CHT1,E1 EGT1,E1 EGT2,';
+            $origHeader .= 'E1 EGT3,E1 EGT4,E2 FFlow,E2 OilT,E2 OilP,E2 MAP,E2 RPM,E2 CHT1,E2 EGT1,E2 EGT2,E2 EGT3,E2 EGT4,AltGPS,TAS,';
+            $origHeader .= 'HSIS,CRS,NAV1,NAV2,COM1,COM2,HCDI,VCDI,WndSpd,WndDr,WptDst,WptBrg,MagVar,AfcsOn,RollM,PitchM,RollC,PichC,VSpdG,';
+            $origHeader .= 'GPSfix,HAL,VAL,HPLwas,HPLfd,VPLwas';
 
-            $this->newFileHeaders = $newHeader;
+            $newHeader = 'Lcl Date,Lcl Time,Latitude,Longitude,BaroA,AltMSL,OAT,IAS,GndSpd,VSpd,Pitch,Roll,LatAc,NormAc,HDG,TRK,volt1,amp1,FQtyL,FQtyR,';
+            $newHeader .= 'E1 FFlow,E1 OilT,E1 OilP,E1 MAP,E1 RPM,E1 CHT1,E1 EGT1,E1 EGT2,E1 EGT3,E1 EGT4,';
+            $newHeader .= 'E2 FFlow,E2 OilT,E2 OilP,E2 MAP,E2 RPM,E2 CHT1,E2 EGT1,E2 EGT2,E2 EGT3,E2 EGT4,TAS,CRS,NAV1,NAV2';
+        }
+        elseif($aircraft == 7) {  // Piper Archer PA28
+            $origHeader = 'Lcl Date,Lcl Time,UTCOfst,AtvWpt,Latitude,Longitude,AltB,BaroA,AltMSL,OAT,IAS,GndSpd,VSpd,Pitch,Roll,';
+            $origHeader .= 'LatAc,NormAc,HDG,TRK,volt1,amp1,FQtyL,FQtyR,E1 FFlow,E1 OilT,E1 OilP,E1 RPM,E1 EGT1,E1 EGT2,E1 EGT3,E1 EGT4,';
+            $origHeader .= 'AltGPS,TAS,HSIS,CRS,NAV1,NAV2,COM1,COM2,HCDI,VCDI,WndSpd,WndDr,WptDst,WptBrg,MagVar,AfcsOn,RollM,PitchM,RollC,';
+            $origHeader .= 'PichC,VSpdG,GPSfix,HAL,VAL,HPLwas,HPLfd,VPLwas';
+
+            $newHeader = 'Lcl Date,Lcl Time,Latitude,Longitude,BaroA,AltMSL,OAT,IAS,GndSpd,VSpd,Pitch,Roll,LatAc,NormAc,HDG,TRK,volt1,amp1,';
+            $newHeader .= 'FQtyL,FQtyR,E1 FFlow,E1 OilT,E1 OilP,E1 RPM,E1 EGT1,E1 EGT2,E1 EGT3,E1 EGT4,TAS,CRS,NAV1,NAV2';
+        }
+        elseif($aircraft == 8) {  // Cirrus SR20
+            $origHeader = 'Lcl Date,Lcl Time,UTCOfst,AtvWpt,Latitude,Longitude,AltB,BaroA,AltMSL,OAT,IAS,GndSpd,VSpd,Pitch,Roll,';
+            $origHeader .= 'LatAc,NormAc,HDG,TRK,volt1,volt2,amp1,E1 FFlow,E1 OilT,E1 OilP,E1 MAP,E1 RPM,E1 CHT1,E1 CHT2,E1 CHT3,E1 CHT4,E1 CHT5,E1 CHT6,';
+            $origHeader .= 'E1 EGT1,E1 EGT2,E1 EGT3,E1 EGT4,E1 EGT5,E1 EGT6,AltGPS,TAS,HSIS,CRS,NAV1,NAV2,COM1,COM2,HCDI,VCDI,WndSpd,WndDr,WptDst,WptBrg,';
+            $origHeader .= 'MagVar,AfcsOn,RollM,PitchM,RollC,PichC,VSpdG,GPSfix,HAL,VAL,HPLwas,HPLfd,VPLwas';
+
+            $newHeader = 'Lcl Date,Lcl Time,Latitude,Longitude,BaroA,AltMSL,OAT,IAS,GndSpd,VSpd,Pitch,Roll,LatAc,NormAc,HDG,TRK,volt1,volt2,amp1,';
+            $newHeader .= 'E1 FFlow,E1 OilT,E1 OilP,E1 MAP,E1 RPM,E1 CHT1,E1 CHT2,E1 CHT3,E1 CHT4,E1 CHT5,E1 CHT6,E1 EGT1,E1 EGT2,E1 EGT3,E1 EGT4,E1 EGT5,E1 EGT6,';
+            $newHeader .= 'TAS,CRS,NAV1,NAV2';
+        }
+        elseif($aircraft == 192) {  // Piper Malibu PA46
+            $origHeader = 'Lcl Date,Lcl Time,UTCOfst,AtvWpt,Latitude,Longitude,AltB,BaroA,AltMSL,OAT,IAS,GndSpd,VSpd,Pitch,Roll,';
+            $origHeader .= 'LatAc,NormAc,HDG,TRK,volt1,amp1,FQtyL,FQtyR,E1 FFlow,E1 OilT,E1 OilP,E1 Torq,E1 NP,E1 NG,E1 ITT,AltGPS,TAS,';
+            $origHeader .= 'HSIS,CRS,NAV1,NAV2,COM1,COM2,HCDI,VCDI,WndSpd,WndDr,WptDst,WptBrg,MagVar,AfcsOn,RollM,PitchM,RollC,PichC,VSpdG,';
+            $origHeader .= 'GPSfix,HAL,VAL,HPLwas,HPLfd,VPLwas';
+
+            $newHeader = 'Lcl Date,Lcl Time,Latitude,Longitude,BaroA,AltMSL,OAT,IAS,GndSpd,VSpd,Pitch,Roll,LatAc,NormAc,HDG,TRK,volt1,amp1,FQtyL,FQtyR,';
+            $newHeader .= 'E1 FFlow,E1 OilT,E1 OilP,TAS,CRS,NAV1,NAV2';
         }
         else{
             //unable to import, unknown file/headers for automatic import
@@ -304,6 +372,8 @@ class ProcessImportCommand extends Command implements SelfHandling, ShouldBeQueu
             $this->upload->save();
             return; //return error code to the above handler to stop processing remaining function call
         }
+
+        $this->newFileHeaders = $newHeader;
 
         $rowCtr     = 0;
 
