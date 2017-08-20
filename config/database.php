@@ -69,6 +69,7 @@ return [
         'fdm' => [
             'driver'    => 'mysql',
             'host'      => env('DB_HOST', 'localhost'),
+            'port'      => env('DB_PORT', 3306),
             'database'  => env('DB_DATABASE', 'fdm_test'),
             'username'  => env('DB_USERNAME', 'root'),
             'password'  => env('DB_PASSWORD', ''),
@@ -81,6 +82,7 @@ return [
         'fdmdm' => [
             'driver'    => 'mysql',
             'host'      => env('DB_HOST', 'localhost'),
+            'port'      => env('DB_PORT', 3306),
             'database'  => 'fdmdm',
             'username'  => env('DB_USERNAME', ''),
             'password'  => env('DB_PASSWORD', ''),
