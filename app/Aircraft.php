@@ -2,6 +2,50 @@
 
 use Eloquent;
 
+/**
+ * NGAFID\Aircraft
+ *
+ * @property int
+ *           $id
+ * @property string
+ *           $aircraft name
+ * @property int|null
+ *           $year
+ * @property string|null
+ *           $make
+ * @property string|null
+ *           $model
+ * @property int|null
+ *           $engine_hp
+ * @property string|null
+ *           $engine_type
+ * @property int|null
+ *           $single_plit_certified
+ * @property-read \Illuminate\Database\Eloquent\Collection|\NGAFID\FlightID[]
+ *                $flights
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\Aircraft
+ *         aircraftTrendDetection($fleetID, $startDate = '', $endDate = '',
+ *         $selectedEvent = '', $selectedAircraft = '')
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\Aircraft
+ *         uniqueAircraft($fleet)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\Aircraft
+ *         whereAircraftName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\Aircraft
+ *         whereEngineHp($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\Aircraft
+ *         whereEngineType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\Aircraft
+ *         whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\Aircraft
+ *         whereMake($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\Aircraft
+ *         whereModel($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\Aircraft
+ *         whereSinglePlitCertified($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\Aircraft
+ *         whereYear($value)
+ * @mixin \Eloquent
+ */
 class Aircraft extends Eloquent
 {
     /**

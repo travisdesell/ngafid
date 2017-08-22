@@ -3,6 +3,269 @@ namespace NGAFID;
 
 use Eloquent;
 
+/**
+ * NGAFID\StabilizedApproach
+ *
+ * @property int         $id
+ * @property int|null    $airport_id
+ * @property string|null $runway
+ * @property string|null $nNumber
+ * @property int|null    $flight
+ * @property int|null    $fleet_id
+ * @property float|null  $oat
+ * @property string|null $fltDate
+ * @property string|null $timeOfFinal
+ * @property int|null    $timeOnFinal
+ * @property float|null  $avgHAT
+ * @property float|null  $maxHAT
+ * @property float|null  $minHAT
+ * @property float|null  $avgSpeed
+ * @property float|null  $maxSpeed
+ * @property float|null  $minSpeed
+ * @property float|null  $avgCrsTrk
+ * @property float|null  $maxCrsTrk
+ * @property float|null  $minCrsTrk
+ * @property float|null  $avgWind
+ * @property float|null  $maxWind
+ * @property float|null  $minWind
+ * @property string|null $rollDirection
+ * @property float|null  $timeInTurn
+ * @property float|null  $startMSL
+ * @property float|null  $endMSL
+ * @property float|null  $deltaMSL
+ * @property float|null  $meanMSL
+ * @property float|null  $maxMSL
+ * @property float|null  $minMSL
+ * @property float|null  $startIAS
+ * @property float|null  $endIAS
+ * @property float|null  $deltaIAS
+ * @property float|null  $meanIAS
+ * @property float|null  $maxIAS
+ * @property float|null  $minIAS
+ * @property float|null  $startVSI
+ * @property float|null  $endVSI
+ * @property float|null  $deltaVSI
+ * @property float|null  $maxVSI
+ * @property float|null  $minVSI
+ * @property float|null  $startPitch
+ * @property float|null  $endPitch
+ * @property float|null  $deltaPitch
+ * @property float|null  $maxPitch
+ * @property float|null  $minPitch
+ * @property float|null  $startRoll
+ * @property float|null  $endRoll
+ * @property float|null  $deltaRoll
+ * @property float|null  $maxRoll
+ * @property float|null  $minRoll
+ * @property float|null  $startRPM
+ * @property float|null  $endRPM
+ * @property float|null  $deltaRPM
+ * @property float|null  $meanRPM
+ * @property float|null  $maxRPM
+ * @property float|null  $minRPM
+ * @property float|null  $maxVertG
+ * @property float|null  $minVertG
+ * @property float|null  $maxLatG
+ * @property float|null  $minLatG
+ * @property float|null  $maxLonG
+ * @property float|null  $minLonG
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         approachData($fleet, $runway, $params, $date)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         graphApproach($flight, $flightTime, $start, $end)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereAirportId($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereAvgCrsTrk($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereAvgHAT($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereAvgSpeed($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereAvgWind($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereDeltaIAS($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereDeltaMSL($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereDeltaPitch($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereDeltaRPM($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereDeltaRoll($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereDeltaVSI($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereEndIAS($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereEndMSL($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereEndPitch($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereEndRPM($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereEndRoll($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereEndVSI($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereFleetId($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereFlight($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereFltDate($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereId($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereMaxCrsTrk($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereMaxHAT($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereMaxIAS($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereMaxLatG($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereMaxLonG($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereMaxMSL($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereMaxPitch($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereMaxRPM($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereMaxRoll($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereMaxSpeed($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereMaxVSI($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereMaxVertG($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereMaxWind($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereMeanIAS($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereMeanMSL($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereMeanRPM($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereMinCrsTrk($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereMinHAT($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereMinIAS($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereMinLatG($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereMinLonG($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereMinMSL($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereMinPitch($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereMinRPM($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereMinRoll($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereMinSpeed($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereMinVSI($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereMinVertG($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereMinWind($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereNNumber($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereOat($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereRollDirection($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereRunway($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereStartIAS($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereStartMSL($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereStartPitch($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereStartRPM($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereStartRoll($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereStartVSI($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereTimeInTurn($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereTimeOfFinal($value)
+ * @method static
+ *         \Illuminate\Database\Eloquent\Builder|\NGAFID\StabilizedApproach
+ *         whereTimeOnFinal($value)
+ * @mixin \Eloquent
+ */
 class StabilizedApproach extends Eloquent
 {
     protected $table = 'stabilized_approach';

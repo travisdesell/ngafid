@@ -3,6 +3,61 @@ namespace NGAFID;
 
 use Eloquent;
 
+/**
+ * NGAFID\FileUpload
+ *
+ * @property int         $id
+ * @property mixed|null  $file_name
+ * @property string|null $path
+ * @property int|null    $user_id
+ * @property string      $upload_time
+ * @property mixed|null  $n_number
+ * @property int|null    $fleet_id
+ * @property int|null    $aircraft_type
+ * @property int|null    $total_num_of_data
+ * @property int|null    $imported_num_of_data
+ * @property string|null $import_time
+ * @property string|null $import_notes
+ * @property int         $error
+ * @property bool|null   $is_submitted
+ * @property int|null    $flight_id
+ * @property string|null $dest_db
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\FileUpload
+ *         importStatus($userID, $fleetID)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\FileUpload
+ *         whereAircraftType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\FileUpload
+ *         whereDestDb($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\FileUpload
+ *         whereError($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\FileUpload
+ *         whereFileName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\FileUpload
+ *         whereFleetId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\FileUpload
+ *         whereFlightId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\FileUpload
+ *         whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\FileUpload
+ *         whereImportNotes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\FileUpload
+ *         whereImportTime($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\FileUpload
+ *         whereImportedNumOfData($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\FileUpload
+ *         whereIsSubmitted($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\FileUpload
+ *         whereNNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\FileUpload
+ *         wherePath($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\FileUpload
+ *         whereTotalNumOfData($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\FileUpload
+ *         whereUploadTime($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\FileUpload
+ *         whereUserId($value)
+ * @mixin \Eloquent
+ */
 class FileUpload extends Eloquent
 {
     protected $table = 'fdmdm.uploaded_file';

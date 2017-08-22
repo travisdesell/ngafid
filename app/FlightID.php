@@ -3,6 +3,73 @@ namespace NGAFID;
 
 use Eloquent;
 
+/**
+ * NGAFID\FlightID
+ *
+ * @property int
+ *                    $id
+ * @property string|null
+ *                    $n_number
+ * @property mixed|null
+ *                    $enc_n_number
+ * @property string
+ *                    $time
+ * @property string
+ *                    $date
+ * @property mixed|null
+ *                    $enc_day
+ * @property string|null
+ *                    $origin
+ * @property string|null
+ *                    $destination
+ * @property int
+ *                    $fleet_id
+ * @property int
+ *                    $aircraft_type
+ * @property string|null
+ *                    $duration
+ * @property-read \NGAFID\Aircraft
+ *                         $aircraft
+ * @property-read \NGAFID\Fleet
+ *                         $fleet
+ * @property-read \Illuminate\Database\Eloquent\Collection|\NGAFID\Main[]
+ *                         $mainTableData
+ * @property-read \Illuminate\Database\Eloquent\Collection|\NGAFID\SelfDefinedApproach[]
+ *                $selfDefinedApproaches
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\FlightID
+ *         exceedanceStats($fleet)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\FlightID
+ *         flightDetails($fleet, $startDate = null, $endDate = null, $archived
+ *         = '', $sort = null, $column = null, $duration = '00:00', $flightID =
+ *         '')
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\FlightID
+ *         totalFlightHours($fleet)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\FlightID
+ *         totalFlightsByAircraft($fleet)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\FlightID
+ *         whereAircraftType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\FlightID
+ *         whereDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\FlightID
+ *         whereDestination($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\FlightID
+ *         whereDuration($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\FlightID
+ *         whereEncDay($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\FlightID
+ *         whereEncNNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\FlightID
+ *         whereFleetId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\FlightID
+ *         whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\FlightID
+ *         whereNNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\FlightID
+ *         whereOrigin($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\FlightID
+ *         whereTime($value)
+ * @mixin \Eloquent
+ */
 class FlightID extends Eloquent
 {
     /**

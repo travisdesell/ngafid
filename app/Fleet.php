@@ -3,6 +3,69 @@ namespace NGAFID;
 
 use Eloquent;
 
+/**
+ * NGAFID\Fleet
+ *
+ * @property int
+ *           $id
+ * @property string
+ *           $name
+ * @property string
+ *           $address
+ * @property string
+ *           $city
+ * @property string|null
+ *           $state
+ * @property string|null
+ *           $zip_code
+ * @property string
+ *           $country
+ * @property string|null
+ *           $phone
+ * @property string|null
+ *           $fax
+ * @property int|null
+ *           $administrator
+ * @property string|null
+ *           $encrypt_data
+ * @property \Carbon\Carbon|null
+ *           $created_at
+ * @property \Carbon\Carbon|null
+ *           $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\NGAFID\FlightID[]
+ *                $flights
+ * @property-read \Illuminate\Database\Eloquent\Collection|\NGAFID\User[]
+ *                $users
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\Fleet
+ *         duration($fleetID)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\Fleet
+ *         whereAddress($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\Fleet
+ *         whereAdministrator($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\Fleet
+ *         whereCity($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\Fleet
+ *         whereCountry($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\Fleet
+ *         whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\Fleet
+ *         whereEncryptData($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\Fleet
+ *         whereFax($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\Fleet
+ *         whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\Fleet
+ *         whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\Fleet
+ *         wherePhone($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\Fleet
+ *         whereState($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\Fleet
+ *         whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\NGAFID\Fleet
+ *         whereZipCode($value)
+ * @mixin \Eloquent
+ */
 class Fleet extends Eloquent
 {
     /**
