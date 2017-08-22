@@ -1,7 +1,13 @@
-<?php namespace NGAFID\Http\Controllers\Flights;
+<?php
+namespace NGAFID\Http\Controllers\Flights;
+
 ini_set("memory_limit","10240M");
 ini_set('max_execution_time', 300); //5 mins
 
+use Auth;
+use DB;
+use NGAFID\CryptoSystem;
+use NGAFID\FileUpload;
 use NGAFID\Http\Controllers\Controller;
 use Illuminate\Pagination\Paginator;
 use NGAFID\Fleet;
@@ -9,6 +15,8 @@ use NGAFID\FlightID;
 use NGAFID\Aircraft;
 use NGAFID\Main;
 use NGAFID\Http\Requests\FlightIdRequest;
+use Request;
+use Session;
 
 class FlightController extends Controller {
 
@@ -19,8 +27,8 @@ class FlightController extends Controller {
         $this->middleware('auth');
     }
 
-    //PHP 5.4 does have array_column functionality
-    function array_column( array $input, $column_key, $index_key = null ) {
+    // PHP 5.4 does have array_column functionality
+    private function array_column( array $input, $column_key, $index_key = null ) {
 
         $result = array();
         foreach( $input as $k => $v )
@@ -37,7 +45,10 @@ class FlightController extends Controller {
         if($selectedFlight != '')
         {
             //check if this is a valid flight ID for the fleet/operator.
-            $validFlight = $fleetTable->find(\Auth::user()->org_id)->flights()->where('id', '=', $selectedFlight)->first();
+            $validFlight = $fleetTable->find(\Auth::user()->org_id)->flights()->where('id', '=', $selectedFlight)
+                ->first(['id', DB::raw("COALESCE(UNCOMPRESS(enc_n_number), n_number) AS 'n_number'"), 'time',
+                            'date', DB::raw("COALESCE(UNCOMPRESS(enc_day), '**') AS 'enc_day'"), 'origin', 'destination',
+                            'fleet_id', 'aircraft_type', 'recorder_type', 'duration']);
 
             if($validFlight)
             {
@@ -59,26 +70,26 @@ class FlightController extends Controller {
         $duration   = \Request::query('duration');
         $flightID   = \Request::query('flightID');
         $action     = 'flights';
-        $archived   = ''; //show all flights that are not archived
+        $archived   = '';  // Show all flights that are not archived
         $pageName   = 'All Flights';
-        $this->perPage = (\Request::query('perPage') == '') ? 20 : \Request::query('perPage');
+        $this->perPage = Request::query('perPage') == '' ? 20 : Request::query('perPage');
 
-        if($filter == 'E')
+        if($filter === 'E')
         {
-            //show flights with events/exceedances that are not archived
+            // Show flights with events/exceedances that are not archived
             $archived   = 'N';
         }
-        elseif($filter == 'A')
+        elseif($filter === 'A')
         {
-            //show flights with events/exceedances that are archived (only flights with exceedances should be archived).
+            // Show flights with events/exceedances that are archived (only flights with exceedances should be archived).
             $archived = 'Y';
         }
 
-        if($event != '')
+        if($event !== '')
         {
             $archived   = 'N';
-            $filter     = 'E'; //this may seen redundant but it is not :) its used to ensure the filter options show 'flights with events' for the custom navigation
-            $action = 'flights/event/' . $event;
+            $filter     = 'E';  // This may seen redundant, but it is not :) it's used to ensure the filter options show 'flights with events' for the custom navigation
+            $action = "flights/event/{$event}";
         }
 
         if($duration == ''){
@@ -155,15 +166,16 @@ class FlightController extends Controller {
 
         $flights = $flightIdTable->flightDetails($fleetID, $startDate, $endDate, $archived, $sort, $column, $duration, $flightID)->paginate($this->perPage);
 
-        $selected = array();
-        $selected['startDate']   = $startDate;
-        $selected['endDate']     = $endDate;
-        $selected['sortBy']      = $sort;
-        $selected['filter']      = $filter;
-        $selected['event']       = $event;
-        $selected['duration']    = $duration;
-        $selected['perPage']     = $this->perPage;
-        $selected['flightID']     = $flightID;
+        $selected = [
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+            'sortBy' => $sort,
+            'filter' => $filter,
+            'event' => $event,
+            'duration' => $duration,
+            'perPage' => $this->perPage,
+            'flightID' => $flightID
+        ];
 
         return view('flights.flights')->with(['data' => $flights, 'selected' => $selected, 'action' => $action, 'pageName' => $pageName]);
     }
@@ -174,14 +186,31 @@ class FlightController extends Controller {
         $flightIdData = $this->validateFlight($flightID);
         //$flightIdData   = $fleetTable->find(\Auth::user()->org_id)->flights()->where('id', '=', $flightID)->first();
 
-        $flightIdData['date'] = $flightIdData['date'] . ' ' . $flightIdData['time'];
-        //unset($flightIdData['time']);
+        $shouldEncrypt = Auth::user()->fleet->wantsDataEncrypted();
 
-        $aircraftTable = new Aircraft();
-        $aircraftInfo = $aircraftTable->groupBy('aircraft name')->orderBy('aircraft name', 'ASC')->get();
+        if ($shouldEncrypt)
+        {
+            $flightIdData['date'] = substr(trim($flightIdData['date']), 0, 8);
+            openssl_private_decrypt(base64_decode($flightIdData['enc_day']), $decrDay, base64_decode(
+                gzuncompress(Session::get('encrSK'))));
+            $flightIdData['date'] .= $decrDay;
+            $flightIdData['date'] .= ' ' . $flightIdData['time'];
+
+            openssl_private_decrypt(base64_decode($flightIdData['n_number']), $decrNnumber, base64_decode(
+                gzuncompress(Session::get('encrSK'))));
+            $flightIdData['n_number'] = $decrNnumber;
+        }
+        else
+        {
+            $flightIdData['date'] = "{$flightIdData['date']} {$flightIdData['time']}";
+        }
+
+        $aircraftInfo = Aircraft::groupBy('aircraft name')->orderBy('aircraft name', 'ASC')
+            ->get();
+
         foreach($aircraftInfo as $aircraft)
         {
-            $aircraftData[$aircraft['id']] = $aircraft['aircraft name'] . ' - ' . $aircraft['year'];// . ' ' . $aircraft['make'] . $aircraft['model'];
+            $aircraftData[$aircraft['id']] = $aircraft['aircraft name'] . ' - ' . $aircraft['year'];
         }
 
         $flightIdData['aircraft'] = $aircraftData;
@@ -192,26 +221,59 @@ class FlightController extends Controller {
     public function update($flightID, FlightIdRequest $flightIdRequest)
     {
         $formfields = $flightIdRequest->all();
-        //$routeParams = \Route::current()->parameters();
-        //$flightID = $routeParams['flights'];
+        $encNnumber = '';
 
-        $flightData = array(
+        $flightData = [
             'n_number'       => $formfields['n_number'],
             'aircraft_type'  => $formfields['aircraft'],
             'origin'         => $formfields['origin'],
             'destination'    => $formfields['destination']
-        );
+        ];
 
-        $flightIdTable = new FlightID();
-        if($flightIdTable->find($flightID)->update($flightData))
+        $shouldEncrypt = Auth::user()->fleet->wantsDataEncrypted();
+
+        if ($shouldEncrypt) {
+            // Encrypt the new n_number before savingin the flight_id table
+            $salt = getenv('STATIC_SALT');
+            $ngafidKey = CryptoSystem::where('fleet_id', '=', Auth::user()->org_id)->pluck(DB::raw("DECODE(ngafid_key, '{$salt}')"));
+
+            if ($ngafidKey) {
+                openssl_public_encrypt(
+                    trim($flightData['n_number']),
+                    $encNnumber,
+                    $ngafidKey);
+
+                if ($encNnumber !== '') {
+                    $flightData['enc_n_number'] = DB::raw("COMPRESS('" . base64_encode(
+                                                              $encNnumber) . "')");
+                    $flightData['n_number'] = DB::raw('NULL');
+                }
+            }
+        }
+
+        if(FlightID::find($flightID)->update($flightData))
         {
-            //recalculate aircraft exceedance
-            \DB::statement('CALL `fdm_test`.`sp_ExceedanceMonitoring`(?, ?)', array(1, $flightID)); //in future check if the aircraft was changed before calling the stored procedure.
+            // Updated encrypted n_number in the log table
+            $uploadsTable = FileUpload::where('flight_id', '=', $flightID)->get()->first();
+            if ($uploadsTable) {
+                $uploadsTable->n_number = $shouldEncrypt && $encNnumber !== ''
+                    ? DB::raw("COMPRESS('" . base64_encode(
+                                 $encNnumber) . "')")
+                    : $flightData['n_number'];
+
+                if ($shouldEncrypt && $encNnumber !== '') {
+                    $uploadsTable->n_number = DB::raw("COMPRESS('" . base64_encode(
+                                                          $encNnumber) . "')");
+                }
+            }
+
+            // Recalculate aircraft exceedances
+            DB::statement('CALL `fdm_test`.`sp_ExceedanceMonitoring`(?, ?)', [1, $flightID]);  // @TODO: In future check if the aircraft was changed before calling the stored procedure.
             flash()->success('Your flight information has been successfully updated!');
         }
 
 
-        return redirect('flights/'.$flightID.'/edit');
+        return redirect("flights/{$flightID}/edit");
     }
 
     public function create()
@@ -231,17 +293,11 @@ class FlightController extends Controller {
         $endDate = \Request::query('endDate');
         $fleetID = \Auth::user()->org_id;
 
-        $aircraftTable = new Aircraft();
-        $aircraftInfo = $aircraftTable->uniqueAircraft($fleetID)->get();
+        $aircraftInfo = Aircraft::uniqueAircraft($fleetID)->get();
 
-        $aircraftInfo = $aircraftInfo->toArray();
-        /*$aircraftType = array();
-        foreach($aircraftInfo as $key => $val){
-            $aircraftType[] = $val['id'];
-        }*/
-        //$aircraftType = array_column($aircraftInfo->toArray(), 'id');
+        $aircraftTypes = $aircraftInfo->lists('id');
 
-        $aircraftType = $this->array_column($aircraftInfo, 'id');
+        // @TODO:  LEFT OFF HERE, LEFT OFF HERE, LEFT OFF HERE, LEFT OFF HERE, LEFT OFF HERE, LEFT OFF HERE
 
         $events = array(
             1   =>  'Excessive Roll',
@@ -253,7 +309,7 @@ class FlightController extends Controller {
         );
 
 
-        if(in_array('1', $aircraftType) || in_array('2', $aircraftType))
+        if(in_array('1', $aircraftTypes) || in_array('2', $aircraftTypes))
         {
             $cessnaEvents = array(
                 3   =>  'Excessive Speed',
