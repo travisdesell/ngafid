@@ -1,9 +1,17 @@
 <?php
 namespace NGAFID\Commands;
 
+/**
+ * @TODO: Create a custom exception for Invalid Flight File Format and replace
+ *        it when throwing general Exception()
+ * @TODO: Refactor to collections
+ */
+
 ini_set("memory_limit", "10240M");
 
+use Carbon\Carbon;
 use DB;
+use Exception;
 use File;
 use Illuminate\Contracts\Bus\SelfHandling;
 use Illuminate\Contracts\Queue\ShouldBeQueued;
@@ -53,33 +61,29 @@ class ProcessImportCommand extends Command
             // Error found with the file, stop processing
             File::delete($this->newFilePath);
 
-            return;
+            throw new \Exception("No valid lines were found in the CSV file.");
         }
 
         if ($this->csvRowCtr > 0) {
             // Check date and time from the CSV to see if the flight has
             // already been imported before we begin to process the file
-            $flight = $this->validateFlight();
+            $flight = $this->getExistingFlightInfoOrCreateNew();
 
             // Update the uploaded_file table with the flight ID
             $this->upload->flight_id = $flight->id;
             $this->upload->total_num_of_data = $this->csvRowCtr;
             $this->upload->save();
 
-            // @TODO: use $flight->hasDataInMainTable() to check is flight has
-            // existing data in Main Table
-
-            // Check the main table to see if the flight exists
-            $numRows = $this->validateFlightData($flight->id);
-
-            if ($numRows == 0) {
+            // Check the main table to see if the flight has existing data
+            // in it
+            if ( !$flight->hasDataInMainTable()) {
                 // 'flight not found'
 
                 // Derive radio altitude and time in milliseconds, then
                 // append them to the csv file
                 $this->processFlightData();
 
-                //insert data into the DB
+                // Insert data into the DB
                 $this->loadDataIntoDB($flight->id);
 
                 // Encrypt flight data
@@ -98,7 +102,7 @@ class ProcessImportCommand extends Command
                     [1, $flight['id']]
                 );
             } else {
-                //'flight found';
+                // 'flight found'
 
                 $this->upload->import_notes = 'You have an existing flight matching the date/time.';
                 $this->upload->error = 1;
@@ -109,6 +113,8 @@ class ProcessImportCommand extends Command
             $this->upload->import_notes = 'Unsupported file format. Error Type: Invalid flight data.';
             $this->upload->import_time = DB::RAW('NOW()');
             $this->upload->save();
+
+            throw new Exception('Unsupported file format. Error Type: Invalid flight data.');
         }
 
         // Delete temp file
@@ -118,7 +124,7 @@ class ProcessImportCommand extends Command
     public function loadDataIntoDB($flightID)
     {
         //create temporary table and insert the data
-        $tmpTable = $flightID . '_main_tmp';
+        $tmpTable = "{$flightID}_main_tmp";
         DB::statement(
             "DROP TEMPORARY TABLE IF EXISTS `fdm_test`.`{$tmpTable}`"
         );
@@ -158,10 +164,12 @@ class ProcessImportCommand extends Command
             $sql .= " eng_1_cht_1, eng_1_cht_2, eng_1_cht_3, eng_1_cht_4, eng_1_cht_5, eng_1_cht_6, eng_1_egt_1, eng_1_egt_2, eng_1_egt_3, eng_1_egt_4, eng_1_egt_5, eng_1_egt_6, tas, obs_1, nav_1_freq, nav_2_freq)";
         }
 
-        $sql .= "SET phase = 0, flight = " . $flightID;
+        $sql .= " SET phase = 0, flight = " . $flightID;
 
         $sql = sprintf($sql, addslashes($this->newFilePath));
-        // @TODO: make call to DB using $sql?
+        DB::connection()
+            ->getpdo()
+            ->exec($sql);
 
         $numRowsInMain = $this->transferToMainTable($flightID, $tmpTable);
         $this->upload->imported_num_of_data = $numRowsInMain;
@@ -171,21 +179,21 @@ class ProcessImportCommand extends Command
         $this->upload->save();
 
         DB::statement(
-            "DROP TEMPORARY TABLE IF EXISTS `fdm_test`.`{$tmpTable}`'"
+            "DROP TEMPORARY TABLE IF EXISTS `fdm_test`.`{$tmpTable}`"
         );
     }
 
     public function transferToMainTable($flightID, $tmpTableName)
     {
         $sql = 'INSERT INTO `fdm_test`.`main` (`flight`, `time`, `radio_altitude_derived`, `latitude`, `longitude`, `altimeter`, `msl_altitude`, `oat`, `indicated_airspeed`, `groundspeed`, `vertical_airspeed`, `pitch_attitude`, `roll_attitude`, ';
-        $sql .= '`lateral_acceleration`, `vertical_acceleration`, `heading`, `course`, `system_1_volts`, `system_2_volts`, `system_1_amps`, `system_2_amps`, `fuel_quantity_left_main`, `fuel_quantity_right_main`, ';
-        $sql .= '`eng_1_fuel_flow`, `eng_1_oil_temp`, `eng_1_oil_press`, `eng_1_mp`, `eng_1_rpm`, `eng_1_cht_1`, `eng_1_cht_2`, `eng_1_cht_3`, `eng_1_cht_4`, `eng_1_cht_5`, `eng_1_cht_6`, ';
-        $sql .= '`eng_1_egt_1`, `eng_1_egt_2`, `eng_1_egt_3`, `eng_1_egt_4`, `eng_1_egt_5`, `eng_1_egt_6`, `tas`, `obs_1`, `nav_1_freq`, `nav_2_freq`) ';
-        $sql .= 'SELECT `flight`, `time`, `radio_altitude_derived`, `latitude`, `longitude`, `altimeter`, `msl_altitude`, `oat`, `indicated_airspeed`, `groundspeed`, `vertical_airspeed`, `pitch_attitude`, `roll_attitude`, ';
-        $sql .= '`lateral_acceleration`, `vertical_acceleration`, `heading`, `course`, `system_1_volts`, `system_2_volts`, `system_1_amps`, `system_2_amps`, `fuel_quantity_left_main`, `fuel_quantity_right_main`, ';
-        $sql .= '`eng_1_fuel_flow`, `eng_1_oil_temp`, `eng_1_oil_press`, `eng_1_mp`, `eng_1_rpm`, `eng_1_cht_1`, `eng_1_cht_2`, `eng_1_cht_3`, `eng_1_cht_4`, `eng_1_cht_5`, `eng_1_cht_6`, ';
-        $sql .= '`eng_1_egt_1`, `eng_1_egt_2`, `eng_1_egt_3`, `eng_1_egt_4`, `eng_1_egt_5`, `eng_1_egt_6`, `tas`, `obs_1`, `nav_1_freq`, `nav_2_freq`';
-        $sql .= 'FROM `fdm_test`.`' . $tmpTableName . '` WHERE `flight` = '
+        $sql .= ' `lateral_acceleration`, `vertical_acceleration`, `heading`, `course`, `system_1_volts`, `system_2_volts`, `system_1_amps`, `system_2_amps`, `fuel_quantity_left_main`, `fuel_quantity_right_main`, ';
+        $sql .= ' `eng_1_fuel_flow`, `eng_1_oil_temp`, `eng_1_oil_press`, `eng_1_mp`, `eng_1_rpm`, `eng_1_cht_1`, `eng_1_cht_2`, `eng_1_cht_3`, `eng_1_cht_4`, `eng_1_cht_5`, `eng_1_cht_6`, ';
+        $sql .= ' `eng_1_egt_1`, `eng_1_egt_2`, `eng_1_egt_3`, `eng_1_egt_4`, `eng_1_egt_5`, `eng_1_egt_6`, `tas`, `obs_1`, `nav_1_freq`, `nav_2_freq`) ';
+        $sql .= ' SELECT `flight`, `time`, `radio_altitude_derived`, `latitude`, `longitude`, `altimeter`, `msl_altitude`, `oat`, `indicated_airspeed`, `groundspeed`, `vertical_airspeed`, `pitch_attitude`, `roll_attitude`, ';
+        $sql .= ' `lateral_acceleration`, `vertical_acceleration`, `heading`, `course`, `system_1_volts`, `system_2_volts`, `system_1_amps`, `system_2_amps`, `fuel_quantity_left_main`, `fuel_quantity_right_main`, ';
+        $sql .= ' `eng_1_fuel_flow`, `eng_1_oil_temp`, `eng_1_oil_press`, `eng_1_mp`, `eng_1_rpm`, `eng_1_cht_1`, `eng_1_cht_2`, `eng_1_cht_3`, `eng_1_cht_4`, `eng_1_cht_5`, `eng_1_cht_6`, ';
+        $sql .= ' `eng_1_egt_1`, `eng_1_egt_2`, `eng_1_egt_3`, `eng_1_egt_4`, `eng_1_egt_5`, `eng_1_egt_6`, `tas`, `obs_1`, `nav_1_freq`, `nav_2_freq`';
+        $sql .= ' FROM `fdm_test`.`' . $tmpTableName . '` WHERE `flight` = '
                 . $flightID . ' ORDER BY `time` ASC';
 
         $numInserted = DB::connection()
@@ -197,25 +205,20 @@ class ProcessImportCommand extends Command
 
     public function processFlightData()
     {
-        // Loop through csv and derive radio altitude and time in milliseconds
+        // Loop through CSV and derive radio altitude and time in milliseconds
         $ctr = 0;
-        $csvCurTime = '';
         $csvPrevTime = '';
-        $csvLatitude = '';
-        $csvLongitude = '';
-        $csvMsl = '';
 
         $time = [];
         $radioAltitude = [];
 
-        $importFileName = $this->upload->path . 'import_'
-                          . $this->upload->file_name;
+        $importFileName = "{$this->upload->path}import_{$this->upload->file_name}";
         File::put(
             $importFileName,
             'Time,RadioAltitude,' . $this->newFileHeaders . "\r\n"
         );
 
-        $headers = explode(',', $this->newFileHeaders);
+        $headers = preg_split('/\s*,\s*/', trim($this->newFileHeaders));
 
         foreach (file($this->newFilePath, FILE_SKIP_EMPTY_LINES) as $row) {
             if ($ctr == 0) {
@@ -223,21 +226,19 @@ class ProcessImportCommand extends Command
                 continue;
             }
 
-            $row = explode(',', $row);
+            $row = preg_split('/\s*,\s*/', trim($row));
             $csvRow = array_combine($headers, $row);
 
-            $csvCurTime = $csvRow['Lcl Time'];
+            $csvCurTime = Carbon::parse($csvRow['Lcl Time']);
             $csvLatitude = $csvRow['Latitude'];
             $csvLongitude = $csvRow['Longitude'];
             $csvMsl = $csvRow['AltMSL'];
 
-            $radioAltDerived = $this->deriveRadioAltitude(
+            $radioAltitude[$ctr] = $this->deriveRadioAltitude(
                 $csvMsl,
                 $csvLatitude,
                 $csvLongitude
             );
-
-            $radioAltitude[$ctr] = $radioAltDerived;
 
             $time[$ctr] = $ctr !== 1
                 ? $this->deriveTimeInMilliseconds(
@@ -264,23 +265,19 @@ class ProcessImportCommand extends Command
         $this->newFilePath = $importFileName;
     }
 
-    public function deriveTimeInMilliseconds($prevTime, $curTime, $prevTimeMs)
-    {
-        $prevTimeSec = strtotime($prevTime) - strtotime('today');
-        $curTimeSec = strtotime($curTime) - strtotime('today');
+    private function deriveTimeInMilliseconds(
+        $prevTime,
+        $curTime,
+        $prevTimeMs
+    ) {
+        $timeDiffMs = $curTime->diffInSeconds($prevTime) * 1000;
 
-        $timeIntervalMs = ($curTimeSec - $prevTimeSec) * 1000;
-
-        if ($timeIntervalMs == 0) {
-            $curTimeMs = $prevTimeMs + 1;
-        } else {
-            $curTimeMs = floor(($prevTimeMs + $timeIntervalMs) / 1000) * 1000;
-        }
-
-        return $curTimeMs;
+        return $prevTimeMs + ($timeDiffMs !== 0
+                ? $timeDiffMs
+                : 1);
     }
 
-    public function deriveRadioAltitude($msl, $latitude, $longitude)
+    private function deriveRadioAltitude($msl, $latitude, $longitude)
     {
         $result = null;
 
@@ -303,13 +300,13 @@ class ProcessImportCommand extends Command
         return $result;
     }
 
-    public function validateFlightData($flightID)
+    private function validateFlightData($flightID)
     {
         return Main::where('flight', '=', $flightID)
             ->count();
     }
 
-    public function validateFlight()
+    private function getExistingFlightInfoOrCreateNew()
     {
         return FlightID::firstOrCreate(
             [
@@ -322,7 +319,7 @@ class ProcessImportCommand extends Command
         );
     }
 
-    public function encryptFlightData(FlightID $flightInfo, $fleetID)
+    private function encryptFlightData($flightInfo, $fleetID)
     {
         $shouldEncrypt = $flightInfo->fleet->wantsDataEncrypted();
         $encNnumber = '';
@@ -339,7 +336,6 @@ class ProcessImportCommand extends Command
 
         // Get the log record
         $uploadsTable = FileUpload::where('flight_id', '=', $flightInfo->id)
-            ->get()// @TODO: cut out get() & jump straight to first()?
             ->first();
 
         // Encrypt the n_number and day in the flight_id table
@@ -390,7 +386,7 @@ class ProcessImportCommand extends Command
         }
     }
 
-    public function createTempFile()
+    private function createTempFile()
     {
         // Create a temporary copy of the file for manipulation
         $origFileName = $this->upload->path . $this->upload->file_name;
@@ -453,59 +449,53 @@ class ProcessImportCommand extends Command
             $this->upload->error = 1;
             $this->upload->save();
 
-            // Return error code to the above handler to stop processing
+            // Throw exception to the above handler to stop processing
             // remaining function call
-            return $this->upload->error;
+            throw new Exception(
+                'Unable to import the selected aircraft data. Error Type: Unknown CSV headers'
+            );
         }
 
         $this->newFileHeaders = $newHeader;
 
-        $rowCtr = 0;
-
+        // Write required header line to new file
         File::put($newFileName, $newHeader . "\r\n");
 
-        $origHeader = explode(',', $origHeader);
+        $explodedOrigHeader = explode(',', $origHeader);
+        $explodedNewHeader = explode(',', $newHeader);
+        $flippedNewHeader = array_flip($explodedNewHeader);
 
-        foreach (file($origFileName, FILE_SKIP_EMPTY_LINES) as $line) {
+        $lines = file($origFileName, FILE_SKIP_EMPTY_LINES);
+        $linesLength = count($lines);
+
+        $headerLineIdx = $this->findIndexOfHeaderLine($lines, $linesLength);
+
+        $validRowCtr = 0;
+
+        // Start loop at the next line after the headers
+        for ($idx = $headerLineIdx + 1; $headerLineIdx < $linesLength; $idx++) {
             // Loop through each line of the csv. Ignore comments and prepare a
-            // new file for import only with the required fields
+            // new file for import only with the required fields.
+
+            $line = $lines[$idx];
 
             if (starts_with($line, '#')) {
+                // Skip comments
                 continue;
             }
 
-            if ($rowCtr == 0) {
-                // Skip header
-                $rowCtr++;
-                continue;
-            }
-
-            $line = explode(',', $line);
-            if (count($line) <> count($origHeader)) {
-                // If the number of fields in the CSV row is not equal to the
-                // number of field names in the CSV header, this indicates
-                // potentially bad/invalid data recording and that row will
-                // not be imported
-                continue;
-            }
-
-            $csv = array_combine($origHeader, $line);
-
-            // Extract a copy of the line containing only the
-            // required headers/fields
-            $newLine = array_intersect_key(
-                $csv,
-                array_flip(explode(',', $newHeader))
+            $newLine = $this->extractRequiredFields(
+                $line,
+                $explodedOrigHeader,
+                $flippedNewHeader
             );
 
-            if ($rowCtr == 1) {
-                // Extract the date and time
-                $this->flightDate = date_format(
-                    date_create($newLine['Lcl Date']),
-                    "Y-m-d"
-                );
-
-                $this->flightTime = $newLine['Lcl Time'];
+            if ($validRowCtr == 0) {
+                // Extract the date and time from first valid line of data
+                $this->flightDate = Carbon::parse($newLine['Lcl Date'])
+                    ->format('Y-m-d');
+                $this->flightTime = Carbon::parse($newLine['Lcl Time'])
+                    ->format('H:i:s');
 
                 // If 'Lcl Date' and 'Lcl Time' fields are not found,
                 // the import should be terminated and log table updated
@@ -514,18 +504,95 @@ class ProcessImportCommand extends Command
                     $this->upload->import_notes = 'Unsupported file format. Error Type: Invalid flight date/time';
                     $this->upload->save();
 
-                    return $this->upload->error;
+                    throw new Exception(
+                        'Unsupported file format. Error Type: Invalid flight date/time'
+                    );
                 }
             }
 
             File::append($newFileName, implode(',', $newLine) . "\r\n");
 
-            $rowCtr++;
+            $validRowCtr++;
         }
 
         chmod($newFileName, 0777);
-        $this->csvRowCtr = ($rowCtr - 1);  // Num rows minus the header column
+        $this->csvRowCtr = $validRowCtr;
 
         return $this->upload->error;
+    }
+
+    /**
+     * This function extracts only the fields that are required from a line of
+     * the flight CSV file.
+     *
+     * @param $line       string A line of data from the CSV file as a string.
+     * @param $origHeader array An array of all the original headers in the CSV
+     *                    file.
+     * @param $newHeader  array An associate array of only the required headers
+     *                    that will go into the new CSV file. The keys of this
+     *                    array should be the actual headers, and the values
+     *                    can be anything. It is typically passed in by using
+     *                    array_flip on the flat array of required headers.
+     *
+     * @return array|bool False if the lengths of the split line string and
+     *                    original header array are not equal. Otherwise, an
+     *                    associative array where the headers from $newHeader
+     *                    are the keys, and the corresponding values from $line
+     *                    are the values.
+     */
+    private function extractRequiredFields($line, $origHeader, $newHeader)
+    {
+        // Use preg_split() to split on commas with an arbitrary number of
+        // spaces between commas and values. Use trim() to disregard spaces
+        // on the ends of the string first.
+        $line = preg_split('/\s*,\s*/', trim($line));
+
+        if (count($line) !== count($origHeader)) {
+            // If the number of fields in the CSV row is not equal to the
+            // number of field names in the CSV header, this indicates
+            // potentially bad/invalid data recording and that row will
+            // not be imported
+            return false;
+        }
+
+        // array_combine() creates an associative array with values from
+        // $origHeader as the keys, which are directly mapped to the values
+        // $line. This performs a 1:1 mapping based on array index.
+        $csv = array_combine($origHeader, $line);
+
+        // Extract a copy of the line containing only the
+        // required headers/fields
+        return array_intersect_key($csv, $newHeader);
+    }
+
+    /**
+     * This function takes in an array of lines from a flight CSV file and
+     * returns the index of the line of headers.
+     *
+     * The header line is the first non-empty line that occurs after all of the
+     * commented lines of meta-data for the Flight Data Recorder. Note: the
+     * commented lines start with a '#'.
+     *
+     * @param array $lines  Array of lines from a flight CSV file.
+     *
+     * @param int   $length Length of the $lines array.
+     *
+     * @return int The index in the array which contains the line of headers.
+     */
+    private function findIndexOfHeaderLine($lines, $length)
+    {
+        for ($i = 0; $i < $length; $i++) {
+            $line = $lines[$i];
+
+            // Pass over lines that start with '#'. They are commented lines.
+            if (starts_with($line, '#')) {
+                continue;
+            }
+
+            // Break on first line that doesn't start with a comment
+            break;
+        }
+
+        return $i;
     }
 }
