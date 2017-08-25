@@ -3,6 +3,7 @@ namespace NGAFID\Commands;
 
 ini_set("memory_limit", "10240M");
 
+use DB;
 use Illuminate\Contracts\Bus\SelfHandling;
 use Illuminate\Contracts\Queue\ShouldBeQueued;
 use Illuminate\Queue\InteractsWithQueue;
@@ -26,11 +27,11 @@ class EncryptFlightDataCommand extends Command
     public function handle()
     {
         $salt = getenv('STATIC_SALT');
-        $encNumber = '';
+        $encNnumber = '';
 
         // Get the public key
         $ngafidKey = CryptoSystem::where('fleet_id', '=', $this->fleetID)
-            ->pluck(\DB::raw("DECODE(ngafid_key, '$salt')"));
+            ->pluck(DB::raw("DECODE(ngafid_key, '$salt')"));
 
         // Loop through the n number and flight date
         $metaData = FlightID::where('fleet_id', '=', $this->fleetID)
@@ -48,25 +49,24 @@ class EncryptFlightDataCommand extends Command
             if (trim($meta['n_number'])) {
                 openssl_public_encrypt(
                     trim($meta['n_number']),
-                    $encNumber,
+                    $encNnumber,
                     $ngafidKey
                 );
 
-                $flightInfo->n_number = \DB::raw("NULL");
-                $flightInfo->enc_n_number = \DB::raw(
-                    "COMPRESS('" . base64_encode($encNumber) . "')"
+                $flightInfo->n_number = DB::raw("NULL");
+                $flightInfo->enc_n_number = DB::raw(
+                    "COMPRESS('" . base64_encode($encNnumber) . "')"
                 );
             }
 
             $trimmedDate = trim($meta['date']);
-            if ($trimmedDate
-                && (substr($trimmedDate, -2) != '00')) {
+            if ($trimmedDate && !ends_with($trimmedDate, '00')) {
                 $day = substr($trimmedDate, -2);
                 $tmpDate = rtrim($trimmedDate, $day);
                 openssl_public_encrypt($day, $encDate, $ngafidKey);
 
                 $flightInfo->date = $tmpDate . '00';
-                $flightInfo->enc_day = \DB::raw(
+                $flightInfo->enc_day = DB::raw(
                     "COMPRESS('" . base64_encode($encDate) . "')"
                 );
             }
@@ -74,26 +74,26 @@ class EncryptFlightDataCommand extends Command
             $flightInfo->save();
 
             // Encrypt the filename and n_number in the log table
-            if ($uploadsTable && $encNumber !== '') {
+            if ($uploadsTable && $encNnumber !== '') {
                 openssl_public_encrypt(
                     $uploadsTable->file_name,
                     $encFileName,
                     $ngafidKey
                 );
 
-                $uploadsTable->file_name = \DB::raw(
+                $uploadsTable->file_name = DB::raw(
                     "COMPRESS('" . base64_encode($encFileName) . "')"
                 );
 
-                $uploadsTable->n_number = \DB::raw(
-                    "COMPRESS('" . base64_encode($encNumber) . "')"
+                $uploadsTable->n_number = DB::raw(
+                    "COMPRESS('" . base64_encode($encNnumber) . "')"
                 );
 
                 $uploadsTable->save();
             }
 
             // Encrypt the epoch and flight time in the GAARD tables
-            $gaard = \DB::selectOne(
+            $gaard = DB::selectOne(
                 "SELECT id, recording_start, recording_end, COALESCE(UNCOMPRESS(recording_start), 'N') AS 'enc_start',
                 COALESCE(UNCOMPRESS(recording_end), 'N') AS 'enc_end'
                 FROM mitre_flight_meta_data
@@ -110,8 +110,9 @@ class EncryptFlightDataCommand extends Command
                 }
 
                 if ($gaard->enc_end == 'N') {
-                    $values[] = "`recording_end` = COMPRESS('"
-                                . base64_encode($gaard->recording_end) . "')";
+                    $values[] = "`recording_end` = COMPRESS('" . base64_encode(
+                            $gaard->recording_end
+                        ) . "')";
                 }
 
                 if ($values) {
@@ -119,11 +120,12 @@ class EncryptFlightDataCommand extends Command
                             ',',
                             $values
                         ) . " WHERE flight_id = {$meta['id']}";
-                    \DB::statement($sql);
+
+                    DB::statement($sql);
                 }
 
                 // Update GPS data
-                $gpsData = \DB::select(
+                $gpsData = DB::select(
                     "SELECT id, epoch, msg_timestamp, gps_time, COALESCE(UNCOMPRESS(epoch), 'N') AS 'enc_epoch',
                       COALESCE(UNCOMPRESS(msg_timestamp), 'N') AS 'enc_msg_timestamp', COALESCE(UNCOMPRESS(gps_time), 'N') AS 'enc_gps_time'
                     FROM mitre_gps_data WHERE meta_data_id = {$gaard->id}"
@@ -133,8 +135,9 @@ class EncryptFlightDataCommand extends Command
                     $values = [];
 
                     if ($gpsRow->enc_epoch === 'N') {
-                        $values[] = "`epoch` = COMPRESS('"
-                                    . base64_encode($gpsRow->epoch) . "')";
+                        $values[] = "`epoch` = COMPRESS('" . base64_encode(
+                                $gpsRow->epoch
+                            ) . "')";
                     }
 
                     if ($gpsRow->enc_msg_timestamp === 'N') {
@@ -144,8 +147,9 @@ class EncryptFlightDataCommand extends Command
                     }
 
                     if ($gpsRow->enc_gps_time === 'N') {
-                        $values[] = "`gps_time` = COMPRESS('"
-                                    . base64_encode($gpsRow->gps_time) . "')";
+                        $values[] = "`gps_time` = COMPRESS('" . base64_encode(
+                                $gpsRow->gps_time
+                            ) . "')";
                     }
 
                     if ($values) {
@@ -153,39 +157,42 @@ class EncryptFlightDataCommand extends Command
                                 ',',
                                 $values
                             ) . " WHERE id = {$gpsRow->id}";
-                        \DB::statement($sql);
+
+                        DB::statement($sql);
                     }
                 }
             } else {
                 // GAARD 2
 
                 // Update GPS data
-                $gpsData = \DB::select(
+                $gpsData = DB::select(
                     "SELECT id, epoch_time, COALESCE(UNCOMPRESS(epoch_time), 'N') AS 'enc_epoch_time'
                     FROM mitre_gaard2_loc WHERE flight = {$meta['id']}"
                 );
 
                 foreach ($gpsData as $gpsRow) {
-                    if ($gpsRow->enc_epoch_time == 'N') {
+                    if ($gpsRow->enc_epoch_time === 'N') {
                         $sql = "UPDATE mitre_gaard2_loc SET epoch_time = COMPRESS('"
                                . base64_encode($gpsRow->epoch_time)
                                . "') WHERE id = {$gpsRow->id}";
-                        \DB::statement($sql);
+
+                        DB::statement($sql);
                     }
                 }
 
                 // Update AHRS data
-                $ahrsData = \DB::select(
+                $ahrsData = DB::select(
                     "SELECT id, epoch_time, COALESCE(UNCOMPRESS(epoch_time), 'N') AS 'enc_epoch_time'
                     FROM mitre_gaard2_ahrs WHERE flight = {$meta['id']}"
                 );
 
                 foreach ($ahrsData as $ahrsRow) {
-                    if ($ahrsRow->enc_epoch_time == 'N') {
+                    if ($ahrsRow->enc_epoch_time === 'N') {
                         $sql = "UPDATE mitre_gaard2_ahrs SET epoch_time = COMPRESS('"
                                . base64_encode($ahrsRow->epoch_time)
                                . "') WHERE id = {$ahrsRow->id}";
-                        \DB::statement($sql);
+
+                        DB::statement($sql);
                     }
                 }
             }
