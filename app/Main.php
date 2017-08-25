@@ -693,9 +693,17 @@ class Main extends Eloquent
         return $this->belongsTo('NGAFID\FlightID', 'flight');
     }
 
+    // @TODO: find all uses of this scope & refactor them to use scopeFlightParameters2()
     public function scopeFlightParameters($query, $parameters, $flightID)
     {
         return $query->select(\DB::raw($parameters))
+            ->where('flight', '=', $flightID)
+            ->orderBy('time', 'ASC');
+    }
+
+    public function scopeFlightParameters2($query, $parameters, $flightID)
+    {
+        return $query->select($parameters)
             ->where('flight', '=', $flightID)
             ->orderBy('time', 'ASC');
     }
@@ -710,7 +718,8 @@ class Main extends Eloquent
                 AVG(eng_1_rpm) AS 'avg_eng_rpm', MAX(eng_1_rpm) AS 'max_eng_rpm', MIN(eng_1_rpm) AS 'min_eng_rpm',
                 AVG(pitch_attitude) AS 'avg_pitch', MAX(pitch_attitude) AS 'max_pitch', MIN(pitch_attitude) AS 'min_pitch',
                 AVG(roll_attitude) AS 'avg_roll', MAX(roll_attitude) AS 'max_roll', MIN(roll_attitude) AS 'min_roll',
-                AVG(vertical_airspeed) AS 'avg_vert', MAX(vertical_airspeed) AS 'max_vert', MIN(vertical_airspeed) AS 'min_vert'"
+                AVG(vertical_airspeed) AS 'avg_vert', MAX(vertical_airspeed) AS 'max_vert', MIN(vertical_airspeed) AS 'min_vert'
+                "
             )
         )
             ->where('flight', '=', $flightID)
