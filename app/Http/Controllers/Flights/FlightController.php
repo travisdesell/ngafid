@@ -84,14 +84,14 @@ class FlightController extends Controller
 
     public function index()
     {
-        $fleetID = \Auth::user()->org_id;
-        $startDate = \Request::query('startDate');
-        $endDate = \Request::query('endDate');
-        $filter = \Request::query('filter');
-        $sort = \Request::query('sort');
-        $event = \Request::route('exceedance');
-        $duration = \Request::query('duration');
-        $flightID = \Request::query('flightID');
+        $fleetID = Auth::user()->org_id;
+        $startDate = Request::query('startDate');
+        $endDate = Request::query('endDate');
+        $filter = Request::query('filter');
+        $sort = Request::query('sort');
+        $event = Request::route('exceedance');
+        $duration = Request::query('duration');
+        $flightID = Request::query('flightID');
         $action = 'flights';
         $archived = '';  // Show all flights that are not archived
         $pageName = 'All Flights';
@@ -221,7 +221,6 @@ class FlightController extends Controller
     {
         $aircraftData = [];
         $flightIdData = $this->validateFlight($flightID);
-        //$flightIdData   = $fleetTable->find(\Auth::user()->org_id)->flights()->where('id', '=', $flightID)->first();
 
         $shouldEncrypt = Auth::user()->fleet->wantsDataEncrypted();
 
@@ -1065,7 +1064,7 @@ class FlightController extends Controller
         File::delete($filename);
         $data = ['found' => false];
 
-        return \Response::json(['success' => true, 'data' => $data]);
+        return Response::json(['success' => true, 'data' => $data]);
     }
 
     public function archive()
