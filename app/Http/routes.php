@@ -15,7 +15,7 @@ Route::get('/', 'WelcomeController@index');
 Route::get('/account', 'WelcomeController@index');
 
 Route::get('dashboard', 'Dashboard\DashboardController@index');
-Route::get('dashboard/index', 'Http\Controllers\Dashboard\DashboardController@index');
+Route::get('dashboard/index', 'Dashboard\DashboardController@index');
 Route::get('home', 'Dashboard\DashboardController@index');
 Route::get('faq', 'Dashboard\DashboardController@faq');
 
@@ -27,9 +27,10 @@ Route::get('account/confirm-email/id/{confirmationCode}', ['as' => 'profile/conf
 // This is created as a resource for future use when the fleet admin is implemented and there is a need to create new user profiles with access control
 Route::resource('profile', 'Profile\ProfileController');
 
+// New routes to handle encryption
 Route::get('cryptosystem', 'Profile\ProfileController@initCryptosystem');
 Route::post('generate', 'Profile\ProfileController@generateKeys');
-Route::resource('decrypt', 'Profile\ProfileController@decrypt');
+Route::get('decrypt', 'Profile\ProfileController@decrypt');
 
 Route::get('flights', ['as'   => 'flights', 'uses' => 'Flights\FlightController@index']);
 Route::get('flights/event/{exceedance}', ['as'   => 'flights/event', 'uses' => 'Flights\FlightController@index']);  // Technically this is equivalent to the above route, however its a nice custom URL for the exceedances

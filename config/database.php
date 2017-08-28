@@ -77,6 +77,7 @@ return [
             'collation' => 'utf8_unicode_ci',
             'prefix'    => '',
             'strict'    => false,
+            'options'   => [PDO::MYSQL_ATTR_LOCAL_INFILE => true],
         ],
 
         'fdmdm' => [
@@ -90,6 +91,7 @@ return [
             'collation' => 'utf8_unicode_ci',
             'prefix'    => '',
             'strict'    => false,
+            'options'   => [PDO::MYSQL_ATTR_LOCAL_INFILE => true],
         ],
         /*End of user defined DB settings*/
 

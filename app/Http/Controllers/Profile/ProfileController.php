@@ -139,6 +139,8 @@ class ProfileController extends Controller
         if (Auth::check()) {
             return view('profile.cryptosystem');
         }
+
+        return redirect('home');
     }
 
     public function generateKeys(CryptoSystemRequest $cryptoRequest)

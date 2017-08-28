@@ -107,7 +107,7 @@ class FlightController extends Controller
             $archived = 'Y';
         }
 
-        if ($event !== '') {
+        if ($event != '') {
             $archived = 'N';
             $filter = 'E';  // This may seen redundant, but it is not :) it's used to ensure the filter options show 'flights with events' for the custom navigation
             $action = "flights/event/{$event}";

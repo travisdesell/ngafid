@@ -155,7 +155,7 @@ class FlightID extends Eloquent
             );
         }
 
-        if ($startDate !== '') {
+        if ($startDate != '') {
             $query->where(
                 DB::raw('flight_id.`date`'),
                 '>=',
@@ -163,7 +163,7 @@ class FlightID extends Eloquent
             );
         }
 
-        if ($endDate !== '') {
+        if ($endDate != '') {
             $query->where(
                 DB::raw('flight_id.`date`'),
                 '<=',
@@ -171,7 +171,7 @@ class FlightID extends Eloquent
             );
         }
 
-        if ($column !== '') {
+        if ($column != '') {
             $query->where(
                 DB::raw('main_exceedances.' . $column),
                 '=',
@@ -179,7 +179,7 @@ class FlightID extends Eloquent
             );
         }
 
-        if ($duration !== '00:00' && $sort == 5) {
+        if ($duration !== '00:00' && $sort === 5) {
             $query->where(
                 DB::raw("TIME_FORMAT(flight_id.`duration`, '%H:%i')"),
                 '>=',

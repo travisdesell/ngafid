@@ -61,7 +61,7 @@ class ToggleEncryption
                         DB::raw("AES_DECRYPT(user_key, '{$hashedKey}')")
                     );
 
-                    if (strpos($userKey, '-----BEGIN RSA PRIVATE KEY-----')
+                    if (strpos($userKey, '-----BEGIN PRIVATE KEY-----')
                         !== false) {
                         $session->put(
                             'encrSK',

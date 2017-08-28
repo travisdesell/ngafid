@@ -167,7 +167,7 @@
                                                                  && count(Session::get('encrSK')) > 0;
                                         ?>
 
-                                        @if(count($data) == 0)
+                                        @if (count($data) === 0)
                                             <tr class="col-md-12 text-center">
                                                 <td class="text-center">
                                                     <b><br />No data to display.</b>
@@ -264,7 +264,7 @@
                                                 <td colspan="12" class="hiddenRow">
                                                     <div class="collapse" id="expand{{ $flight['id'] }}">
                                                         <div class="col-md-3 col-md-offset-1">
-                                                            @if ($fleet->wantsDataEncrypted)
+                                                            @if ($fleet->wantsDataEncrypted())
                                                                 @if ($showDecryptedData)
                                                                     <?php openssl_private_decrypt(base64_decode($flight['n_number']), $decrNnumber, base64_decode(gzuncompress(Session::get('encrSK')))); ?>
                                                                     <b>

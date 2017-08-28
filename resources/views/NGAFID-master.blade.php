@@ -57,20 +57,6 @@
                             <a href="{{ url('/auth/register') }}">Register</a>
                         </li>
                     @else
-                        @if (Auth::user()->fleet->wantsDataEncrypted())
-                            <li>
-                                <a href="">
-                                    Encryption <input type="checkbox"
-                                                      id="toggleEncryption"
-                                                      data-toggle="toggle"
-                                                      data-onstyle="success"
-                                                      data-offstyle="danger"
-                                                      data-size="mini"
-                                                      checked="{{ Session::get('toggleEnc') === 'F' ? '' : 'checked' }}">
-                                </a>
-                            </li>
-                        @endif
-
                         <li class="dropdown">
                             <a href="#"
                                class="dropdown-toggle"
@@ -96,6 +82,24 @@
                         </li>
                     @endif
                 </ul>
+
+                @if (Auth::check())
+                    <form class="navbar-form navbar-right form-horizontal">
+                        <div class="form-group">
+                            @if (Auth::user()->fleet->wantsDataEncrypted())
+                                {{-- Fleet is enrolled in encryption, show a toggle for them to either show their flight data encrypted (toggle='On') or decrypted (toggle='Off') --}}
+                                <div class="checkbox">
+                                    <input type="checkbox" id="toggleEncryption" {{ Session::get('toggleEnc') === 'F' ? '' : 'checked' }}>
+                                </div>
+                            @else
+                                {{-- Fleet has not signed up for encryption yet, give them a button to enroll --}}
+                                <a href="{{ url('cryptosystem') }}" class="btn btn-sm" data-toggle="tooltip" data-placement="bottom" title="Click to Enroll">
+                                    Enable Encryption
+                                </a>
+                            @endif
+                        </div>
+                    </form>
+                @endif
             </div>
         </div>
     </nav>
@@ -110,14 +114,28 @@
     <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
 
     <script>
-        $('div.alert').not('alert-important').delay(5000).fadeOut(300);
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
 
-        $('#toggleEncryption').change(function () {
-            if ($(this).prop('checked'))
-                window.location.href = "{{ url('/decrypt?toggle=T') }}";
-            else
-                window.location.href = "{{ url('/decrypt?toggle=F') }}";
-        });
+            // This will automatically dismiss alerts after a 5 second delay;
+            // commented out for now because some error messages are too long
+            // to read in 5 seconds
+//            $('div.alert').not('alert-important').delay(5000).fadeOut(300);
+
+            $('#toggleEncryption').bootstrapSwitch({
+                size: 'mini',
+                onColor: 'success',
+                offColor: 'danger',
+                labelText: 'Encryption',
+                onSwitchChange: function (event, state) {
+                    console.log('Toggle: ' + $(this).prop('checked'));
+
+                    window.location.href = $(this).prop('checked')
+                    ? "{{ url('/decrypt?toggle=T') }}"
+                    : "{{ url('/decrypt?toggle=F') }}";
+                }
+            });
+        })
     </script>
 
     @yield('jsScripts')

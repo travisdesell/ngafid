@@ -57,7 +57,7 @@
                                         @foreach ($data as $flight)
                                             <tr class="{{ ($flight->status === 'Failed' ? 'danger' : ($flight->status === 'Imported' ? 'success' : ($flight->status === 'Pending' ? 'warning' : 'info'))) }}">
                                                 <td class="col-md-2" data-title="N Number">
-                                                    @if ($fleet>wantsDataEncrypted())
+                                                    @if ($fleet->wantsDataEncrypted())
                                                         @if ($showDecryptedData)
                                                             <?php openssl_private_decrypt(base64_decode($flight->n_number),
                                                                 $decrNnumber,

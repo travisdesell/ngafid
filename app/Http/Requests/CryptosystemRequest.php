@@ -34,21 +34,18 @@ class CryptosystemRequest extends Request
     public function rules()
     {
         return [
-            'secretKey'              => [
+            'secretKey' => [
                 'required',
-                'min:8',
-                'max:24',
+                'min:10',
+                'max:32',
                 'confirmed',
-                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*(_|[^\w])).+$/',
             ],
-            'secretKey_confirmation' => 'required|min:8|max:24',
         ];
     }
 
     public function messages()
     {
         return [
-            'secretKey.regex' => 'The secret key is weak and must contain one or more uppercase, lowercase, numeric, and special characters.',
         ];
     }
 }
