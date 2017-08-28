@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "163d1fbca603f0d9f2071b66240e8e09",
+    "content-hash": "c188faab2d17953a2f93bd847858dc11",
     "packages": [
         {
             "name": "classpreloader/classpreloader",
@@ -1132,6 +1132,55 @@
                 "php"
             ],
             "time": "2015-09-19T14:15:08+00:00"
+        },
+        {
+            "name": "nostalgiaz/bootstrap-switch",
+            "version": "3.3.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Bttstrp/bootstrap-switch.git",
+                "reference": "02721b769a6ac83eabe733fd9f08a2ddc7320756"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Bttstrp/bootstrap-switch/zipball/02721b769a6ac83eabe733fd9f08a2ddc7320756",
+                "reference": "02721b769a6ac83eabe733fd9f08a2ddc7320756",
+                "shasum": ""
+            },
+            "type": "component",
+            "extra": {
+                "component": {
+                    "name": "bootstrap-switch",
+                    "files": [
+                        "dist/**"
+                    ],
+                    "scripts": [
+                        "dist/js/bootstrap-switch.js"
+                    ],
+                    "shim": {
+                        "exports": "BootstrapSwitch"
+                    }
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache License Version 2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Mattia Larentis",
+                    "homepage": "http://www.larentis.eu"
+                }
+            ],
+            "description": "Turn checkboxes and radio buttons into toggle switches.",
+            "homepage": "https://bttstrp.github.io/bootstrap-switch",
+            "keywords": [
+                "JS",
+                "bootstrap",
+                "javascript",
+                "switch"
+            ],
+            "time": "2017-02-25T18:32:28+00:00"
         },
         {
             "name": "paragonie/random_compat",
