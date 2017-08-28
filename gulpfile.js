@@ -12,5 +12,20 @@ var elixir = require('laravel-elixir');
  */
 
 elixir(function(mix) {
-    mix.less('app.less');
+    mix
+        .styles([
+            "app.css",
+            "./vendor/nostalgiaz/bootstrap-switch/dist/css/bootstrap3/bootstrap-switch.min.css"
+        ], "public/css/vendor.css")
+        .styles([
+            "custom.css"
+        ], "public/css/custom.css")
+        .scripts([
+            "./vendor/nostalgiaz/bootstrap-switch/dist/js/bootstrap-switch.min.js"
+        ], "public/js/vendor.js")
+        .version([
+            "css/vendor.css",
+            "css/custom.css",
+            "js/vendor.js"
+        ]);
 });
