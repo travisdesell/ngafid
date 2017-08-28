@@ -285,7 +285,7 @@
                                                             @endif
 
                                                             <b>Aircraft:</b>
-                                                            {{ $flight['aircraft name'] . ' - ' . $flight['year'] . ' ' . $flight['make'] . ' ' . $flight['model'] }}
+                                                            {{ "{$flight['aircraft name']} - {$flight['year']} {$flight['make']} {$flight['model']}" }}
                                                             <br />
 
                                                             <b>Edit Flight:</b>

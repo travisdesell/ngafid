@@ -115,6 +115,11 @@ class Fleet extends Eloquent
         return $this->hasMany('NGAFID\FlightID');
     }
 
+    public function crypto_key()
+    {
+        return $this->hasOne('NGAFID\CryptoSystem', 'fleet_id', 'id');
+    }
+
     /*************************************************************************
      * Public Methods
      */

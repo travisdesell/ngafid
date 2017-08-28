@@ -45,7 +45,6 @@ class CryptosystemRequest extends Request
 
     public function messages()
     {
-        return [
-        ];
+        return [];
     }
 }

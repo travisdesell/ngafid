@@ -29,19 +29,6 @@ class FlightController extends Controller
         $this->middleware('auth');
     }
 
-    // PHP 5.4 does have array_column functionality
-    private function array_column(array $input, $column_key, $index_key = null)
-    {
-        $result = [];
-        foreach ($input as $k => $v) {
-            $result[$index_key
-                ? $v[$index_key]
-                : $k] = $v[$column_key];
-        }
-
-        return $result;
-    }
-
     // @TODO: refactor so this just returns the result of the Fleet::find()->first() call. Need to find all usages and modify them to use the new return style properly
     private function validateFlight($flightID = null)
     {
@@ -182,9 +169,7 @@ class FlightController extends Controller
                 break;
         }
 
-        $flightIdTable = new FlightID();
-
-        $flights = $flightIdTable->flightDetails(
+        $flights = FlightID::flightDetails(
             $fleetID,
             $startDate,
             $endDate,

@@ -20,7 +20,7 @@ class ToggleEncryption
     public function handle($request, Closure $next)
     {
         if (Auth::check()) {
-            $shouldEncrypt = Auth::user()->fleet->wantsDataEncrypted();
+            $enrolledInEncryption = Auth::user()->fleet->wantsDataEncrypted();
             $secretKey = $request->input('secretKey');
             $toggle = 'T';
 
@@ -44,7 +44,7 @@ class ToggleEncryption
             }
 
             if (strpos($request->path(), 'decrypt') !== false
-                && $shouldEncrypt) {
+                && $enrolledInEncryption) {
                 if ( !str_contains(URL::previous(), 'decrypt')) {
                     $session->put('prevURL', URL::previous());
                     $session->save();
@@ -57,9 +57,10 @@ class ToggleEncryption
                         'fleet_id',
                         '=',
                         Auth::user()->org_id
-                    )->pluck(
-                        DB::raw("AES_DECRYPT(user_key, '{$hashedKey}')")
-                    );
+                    )
+                        ->pluck(
+                            DB::raw("AES_DECRYPT(user_key, '{$hashedKey}')")
+                        );
 
                     if (strpos($userKey, '-----BEGIN PRIVATE KEY-----')
                         !== false) {
@@ -85,7 +86,7 @@ class ToggleEncryption
                 $session->save();
             } elseif ($request->is('flights/*/edit')) {
                 // Check if data is decrypted before editing
-                if ($shouldEncrypt && $toggle !== 'F'
+                if ($enrolledInEncryption && $toggle !== 'F'
                     && count($secretKey) <= 0) {
                     $session->setPreviousUrl($request->url());
 

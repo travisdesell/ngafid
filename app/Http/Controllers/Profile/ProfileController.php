@@ -192,7 +192,7 @@ class ProfileController extends Controller
                 $fleetInfo->encrypt_data = DB::raw("'Y'");
                 $fleetInfo->save();
 
-                flash()->success('Encrypted enabled!');
+                flash()->success('Encryption is now enabled.');
 
                 // Retroactively encrypt the user's data
                 Queue::pushOn(
@@ -211,9 +211,9 @@ class ProfileController extends Controller
 
     public function decrypt(Request $request)
     {
-        $shouldEncrypt = Auth::user()->fleet->wantsDataEncrypted();
+        $enrolledInEncryption = Auth::user()->fleet->wantsDataEncrypted();
 
-        if ($shouldEncrypt) {
+        if ($enrolledInEncryption) {
             return view(
                 'profile.decrypt',
                 ['toggle' => $request->input('toggle')]

@@ -39,7 +39,9 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="#">N<span style="color:#00008b">GA</span>FID</a>
+                <a class="navbar-brand" href="#">
+                    N<span style="color:#00008b">GA</span>FID
+                </a>
             </div>
 
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
@@ -71,16 +73,22 @@
                             </a>
                             <ul class="dropdown-menu" role="menu">
                                 <li>
-                                    <a href="{{ url('/profile') }}">My Account</a>
+                                    <a href="{{ url('/profile') }}">
+                                        My Account
+                                    </a>
                                 </li>
                                 <li>
                                     <a href="{{ url('/faq') }}">FAQ's</a>
                                 </li>
                                 <li>
-                                    <a href="mailto:jhiggins@aero.und.edu">Contact Us</a>
+                                    <a href="mailto:jhiggins@aero.und.edu">
+                                        Contact Us
+                                    </a>
                                 </li>
                                 <li>
-                                    <a href="{{ url('/auth/logout') }}">Logout</a>
+                                    <a href="{{ url('/auth/logout') }}">
+                                        Logout
+                                    </a>
                                 </li>
                             </ul>
                         </li>
@@ -147,7 +155,8 @@
     <div class="footer">
         <div class="container col-xs-12">
             <div id="copyright">
-                &copy; Copyright {{ date("Y") }} National General Aviation Flight Information Database
+                &copy; Copyright {{ date("Y") }}
+                National General Aviation Flight Information Database
                 <img class="pull-right" src="{{ asset('images/aerospace-logo.png') }}" height="17" alt="UND Aerospace">
             </div>
         </div>

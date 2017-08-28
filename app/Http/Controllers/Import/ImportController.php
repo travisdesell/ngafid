@@ -53,7 +53,6 @@ class ImportController extends Controller {
 
             $uploadID = $uploadsTable->id;
             \Queue::pushOn('webImport', new ProcessImportCommand($uploadID)); //it seems this processes the file synchronously
-            //$this->dispatch(new ProcessImportCommand($uploadID));
 
             chmod($path, 0777);
 
@@ -85,9 +84,8 @@ class ImportController extends Controller {
     {
         $fleetID        = \Auth::user()->org_id;
         $userID         = \Auth::user()->id;
-        $uploadsTable   = new FileUpload();
 
-        $importedFlights = $uploadsTable->importStatus($userID, $fleetID)->paginate($this->perPage);
+        $importedFlights = FileUpload::importStatus($userID, $fleetID)->paginate($this->perPage);
         return view('import.status')->with(['data' => $importedFlights]);
     }
 

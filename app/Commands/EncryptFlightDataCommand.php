@@ -42,13 +42,13 @@ class EncryptFlightDataCommand extends Command
         foreach ($metaData as $meta) {
             $flightInfo = FlightID::find($meta['id']);
             $uploadsTable = FileUpload::where('flight_id', $meta['id'])
-                ->get()
                 ->first();
 
             // Encrypt the n_number and day in the flight_id table
-            if (trim($meta['n_number'])) {
+            $trimmedNnumber = trim($meta['n_number']);
+            if ($trimmedNnumber) {
                 openssl_public_encrypt(
-                    trim($meta['n_number']),
+                    $trimmedNnumber,
                     $encNnumber,
                     $ngafidKey
                 );
@@ -104,12 +104,12 @@ class EncryptFlightDataCommand extends Command
                 // GAARD 1
                 $values = [];
 
-                if ($gaard->enc_start == 'N') {
+                if ($gaard->enc_start === 'N') {
                     $values[] = "`recording_start` = COMPRESS('"
                                 . base64_encode($gaard->recording_start) . "')";
                 }
 
-                if ($gaard->enc_end == 'N') {
+                if ($gaard->enc_end === 'N') {
                     $values[] = "`recording_end` = COMPRESS('" . base64_encode(
                             $gaard->recording_end
                         ) . "')";

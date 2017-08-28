@@ -180,6 +180,7 @@
                 $('input[name="zip_code"]')
                     .attr('readonly', false)
                     .css('background-color', '#FFFFFF');
+
                 $('#states').removeAttr('disabled');
             }
         }
