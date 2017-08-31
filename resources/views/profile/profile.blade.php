@@ -64,17 +64,6 @@
                                     </a>
                                 </div>
                             </div>
-
-                            @if (Auth::user()->isFleetAdministrator())
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label">
-                                        Encrypt Flight Data
-                                    </label>
-                                    <div class="col-md-6">
-                                        <input type="checkbox" id="enableEncryption" {{ $data['encEnabled'] }} data-toggle="toggle" data-onstyle="success" data-on="Yes" data-off="No" data-offstyle="danger" data-size="mini">
-                                    </div>
-                                </div>
-                            @endif
                         </div>
 
                         <div class="col-md-5 col-md-offset-1">

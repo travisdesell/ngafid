@@ -1,11 +1,12 @@
 @extends('NGAFID-master')
 
 @section('cssScripts')
-<style>
-    .ui-datepicker-calendar {
-        display: none;
-    }
-</style>
+    <link href="//code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css" rel="stylesheet" />
+    <style>
+        .ui-datepicker-calendar {
+            display: none;
+        }
+    </style>
 @endsection
 
 @section('content')
@@ -13,43 +14,46 @@
         <div class="row">
             <div class="col-md-10 col-md-offset-1">
                 <div class="panel panel-default">
-                    <div class="panel-heading"><b>Self Defined Approach Analysis</b> <span class="pull-right">{{date("D M d, Y G:i A T")}}</span></div>
+                    <div class="panel-heading">
+                        <b>Self Defined Approach Analysis</b>
+                        <span class="pull-right">{{date("D M d, Y G:i A T")}}</span>
+                    </div>
 
                     <div class="panel-body">
                         {!! Form::open(['method' => 'GET', 'url' => '/approach/selfdefined', 'class' => 'form-horizontal', 'id' => 'sdTool']) !!}
-                        {!! Form::token() !!}
+                            {!! Form::token() !!}
                             <div class="col-md-3">
                                 <div class="form-group">
                                     {!! Form::label('Airport', 'Airport:') !!}
                                     {!! Form::text('airports', '', ['class' => 'form-control', 'id' => 'airports']) !!}
                                 </div>
                             </div>
-                        <div class="col-md-2 col-md-offset-1">
-                            <div class="form-group">
-                                {!! Form::label('Runway', 'Runway:') !!}
-                                {!! Form::select('runway', $airports, $selectedRunway, ['placeholder' => 'Select Runway', 'class' => 'form-control', 'id' => 'runway']) !!}
-                            </div>
-                        </div>
-                        <div class="col-md-2 col-md-offset-1">
-                            <div class="form-group">
-                                {!! Form::label('Month/Year', 'Month/Year:') !!}
-                                <div class="input-group">
-                                    <input class="form-control mthYr" id="mthYr" type="text" name="mthYr" value="{{ $date }}" />
-                                    <span class="input-group-addon">
-                                        <span class="glyphicon glyphicon-calendar"></span>
-                                    </span>
+                            <div class="col-md-2 col-md-offset-1">
+                                <div class="form-group">
+                                    {!! Form::label('Runway', 'Runway:') !!}
+                                    {!! Form::select('runway', $airports, $selectedRunway, ['placeholder' => 'Select Runway', 'class' => 'form-control', 'id' => 'runway']) !!}
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-md-12">
-                            <button type="submit" id="display" class="btn btn-primary btn-sm pull-right" data-link="{{ url('/approach/selfdefined') }}">
-                                Display
-                            </button>
-                        </div>
+                            <div class="col-md-2 col-md-offset-1">
+                                <div class="form-group">
+                                    {!! Form::label('Month/Year', 'Month/Year:') !!}
+                                    <div class="input-group">
+                                        <input class="form-control mthYr" id="mthYr" type="text" name="mthYr" value="{{ $date }}" />
+                                        <span class="input-group-addon">
+                                            <span class="glyphicon glyphicon-calendar"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <button type="submit" id="display" class="btn btn-primary btn-sm pull-right" data-link="{{ url('/approach/selfdefined') }}">
+                                    Display
+                                </button>
+                            </div>
 
-                        <br /><br />
+                            <br /><br />
 
-                        <div id="chart" class="col-md-12"></div>
+                            <div id="chart" class="col-md-12"></div>
                         {!! Form::close() !!}
                     </div>
                 </div>
@@ -59,8 +63,6 @@
 @endsection
 
 @section('jsScripts')
-    <link href="//code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css" rel="stylesheet" />
-    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
     <script src="//code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
 
     <script src="http://code.highcharts.com/4.2.2/highcharts.js"></script>
@@ -69,23 +71,23 @@
     <script src="http://code.highcharts.com/4.2.2/modules/exporting.js"></script>
 
     <script type="text/javascript">
-        $(function() {
+        $(function () {
 
             // Provide auto-complete feature to Airports text box
             $("#airports").autocomplete({
                 source: "airports",
                 minLength: 3,
-                select: function(event, ui) {
+                select: function (event, ui) {
                     var idx = ui.item.id;
                     var CSRF_TOKEN = $('input[name="_token"]').val();
                     $.ajax({
                         type: "GET",
                         url: "{{ url('/approach/runways') }}",
-                        data : {code: idx, _token: CSRF_TOKEN},
+                        data: {code: idx, _token: CSRF_TOKEN},
                         success: function (data) {
                             var items = "";
-                            $.each( data.data, function(key, val) {
-                                items += "<option value='" + key + "'>" + val + "</option>";
+                            $.each(data.data, function (key, val) {
+                                items += '<option value="' + key + '">' + val + '</option>';
                             });
 
                             $('#runway').html(items);
@@ -118,9 +120,9 @@
 
                     if ((datestr = $(this).val()).length > 0) {
                         var year = datestr.substring(0, 4);
-                        var month = datestr.substring(datestr.length-2, datestr.length);
-                        $(this).datepicker('option', 'defaultDate', new Date(year, month-1, 1));
-                        $(this).datepicker('setDate', new Date(year, month-1, 1));
+                        var month = datestr.substring(datestr.length - 2, datestr.length);
+                        $(this).datepicker('option', 'defaultDate', new Date(year, month - 1, 1));
+                        $(this).datepicker('setDate', new Date(year, month - 1, 1));
                     }
                 }
             });
@@ -155,7 +157,7 @@
                         colorByPoint: false,
                         tooltip: {
                             pointFormatter: function () {
-                                return '<b>' + this.x + '\u00B0-' + (this.x+.5) + '\u00B0</b>' +
+                                return '<b>' + this.x + '\u00B0-' + (this.x + .5) + '\u00B0</b>' +
                                     '<br /><b>Occurrences: ' + this.y + '</b>';
                             }
                         }
@@ -170,7 +172,7 @@
                                         runway: $('#runway :selected').html(),
                                         date: $('#mthYr').val(),
                                         gpa_low: e.point.x,
-                                        gpa_high: e.point.x+0.5,
+                                        gpa_high: e.point.x + 0.5,
                                         flight_id: e.point.ids
                                     }), ''
                                 ).focus();
@@ -231,7 +233,6 @@
                         chart.hideLoading();
                     },
                     error: function (data) {
-//                        alert('error');
                     }
                 });
             });

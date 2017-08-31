@@ -35,10 +35,6 @@ class ProfileController extends Controller
     public function index()
     {
         $fleetInfo = Auth::user()->fleet;
-        $shouldEncrypt = $fleetInfo->wantsDataEncrypted();
-        $readOnly = $shouldEncrypt
-            ? 'checked disabled'
-            : '';
 
         $userData = [
             'firstname'  => Auth::user()->firstname,
@@ -48,7 +44,6 @@ class ProfileController extends Controller
                 : 'NGAFID',
             'username'   => Auth::user()->email,
             'fleetInfo'  => $fleetInfo,
-            'encEnabled' => $readOnly,
         ];
 
         return view('profile.profile')->with('data', $userData);
@@ -216,7 +211,7 @@ class ProfileController extends Controller
         if ($enrolledInEncryption) {
             return view(
                 'profile.decrypt',
-                ['toggle' => $request->input('toggle')]
+                ['toggle' => Request::input('toggle')]
             );
         }
 

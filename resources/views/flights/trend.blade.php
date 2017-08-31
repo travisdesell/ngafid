@@ -9,11 +9,16 @@
         <div class="row">
             <div class="col-md-10 col-md-offset-1">
                 <div class="panel panel-default">
-                    <div class="panel-heading"><b>Trend Detection</b> <span class="pull-right">{{date("D M d, Y G:i A T")}}</span></div>
+                    <div class="panel-heading">
+                        <b>Trend Detection</b>
+                        <span class="pull-right">{{date("D M d, Y G:i A T")}}</span>
+                    </div>
 
                     <div class="panel-body">
                         {!! Form::open(['method' => 'GET', 'url' => 'flights/trend', 'class' => 'form-horizontal']) !!}
-                        <p class="col-md-offset-1">Select aircraft type, event:</p>
+                        <p class="col-md-offset-1">
+                            Select aircraft type, event:
+                        </p>
                         <div class="col-md-5">
                             <div class="form-group">
                                 <label class="col-md-4 control-label">Aircraft</label>
@@ -31,9 +36,11 @@
                         </div>
                         <div class="col-md-5">
                             <div class="form-group">
-                                <label class="col-md-4 control-label">Start Date</label>
+                                <label class="col-md-4 control-label">
+                                    Start Date
+                                </label>
                                 <div class="col-md-6 input-group">
-                                    <input class="form-control" id="startDatepicker" type="text" name="startDate" value="{{$trendData['startDate']}}" />
+                                    <input class="form-control" id="startDatepicker" type="text" name="startDate" value="{{ $trendData['startDate'] }}" />
                                     <span class="input-group-addon">
                                         <span class="glyphicon glyphicon-calendar"></span>
                                     </span>
@@ -41,7 +48,9 @@
                             </div>
 
                             <div class="form-group">
-                                <label class="col-md-4 control-label">End Date</label>
+                                <label class="col-md-4 control-label">
+                                    End Date
+                                </label>
                                 <div class="col-md-6 input-group">
                                     <input class="form-control" id="endDatepicker" type="text" name="endDate" value="{{$trendData['endDate']}}" />
                                     <span class="input-group-addon">
@@ -68,25 +77,21 @@
 @endsection
 
 @section('jsScripts')
+    <script src="https://code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
+
     <script src="https://code.highcharts.com/4.2.2/highcharts.js"></script>
     <script src="https://code.highcharts.com/4.2.2/modules/no-data-to-display.js"></script>
     <script src="https://code.highcharts.com/4.2.2/modules/exporting.js"></script>
-    <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
-    <script src="https://code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
+
     <script type="text/javascript">
-        $(function() {
-            $( "#startDatepicker" ).datepicker({
-                //changeMonth: true,
-                changeYear: true,
-                dateFormat: "yy-mm-dd"
-            });
-        });
-        $(function() {
-            $( "#endDatepicker" ).datepicker({
-                //changeMonth: true,
-                changeYear: true,
-                dateFormat: "yy-mm-dd"
-            });
+        var datePickerOptions = {
+            changeYear: true,
+            dateFormat: 'yy-mm-dd'
+        };
+
+        $(function () {
+            $("#startDatepicker").datepicker(datePickerOptions);
+            $("#endDatepicker").datepicker(datePickerOptions);
         });
     </script>
     <script type="text/javascript">
@@ -130,8 +135,8 @@
                     tooltip: {
                         formatter: function () {
                             return '<b>' + this.series.name + '</b><br/>' +
-                                    '<b>' + Highcharts.dateFormat('%m-%Y', this.x) + '</b><br/>' +
-                                    'percentage of occurrence: ' + '</b>' + Highcharts.numberFormat(this.y, 2) + '</b>';
+                                '<b>' + Highcharts.dateFormat('%m-%Y', this.x) + '</b><br/>' +
+                                'percentage of occurrence: ' + '</b>' + Highcharts.numberFormat(this.y, 2) + '</b>';
                         }
                     },
                     legend: {

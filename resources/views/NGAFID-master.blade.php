@@ -10,6 +10,7 @@
     <link rel="shortcut icon" href="{{ asset('images/favicon.ico') }}">
 
     <!-- Styles -->
+    {{-- @TODO: remove bootstrap styles from resources/assets/css/app.css so that we can use the CDN instead. --}}
     {{--<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">--}}
     <link href="{{ elixir("css/vendor.css") }}" rel="stylesheet">
     <link href="{{ elixir("css/custom.css") }}" rel="stylesheet">
@@ -64,11 +65,8 @@
                         </li>
                     @else
                         <li class="dropdown">
-                            <a href="#"
-                               class="dropdown-toggle"
-                               data-toggle="dropdown"
-                               role="button"
-                               aria-expanded="false">{{ Auth::user()->email }}
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                                {{ Auth::user()->email }}
                                 <span class="glyphicon glyphicon-cog"></span>
                             </a>
                             <ul class="dropdown-menu" role="menu">
