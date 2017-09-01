@@ -552,39 +552,39 @@ class FlightController extends Controller
             $summaryData = '<table class="table table-hover table-striped table-bordered table-condensed">';
             $summaryData .= '<thead><tr><th>Parameter</th><th>Average</th><th>Range</th></tr></thead>';
             $summaryData .= '<tr><td>Airspeed</td><td>' . round(
-                    $stats['avg_airspeed'],
+                    $summary['avg_airspeed'],
                     2
-                ) . '</td><td>' . round($stats['min_airspeed'], 2) . ' to '
-                            . round($stats['max_airspeed'], 2) . "</td></tr>";
+                ) . '</td><td>' . round($summary['min_airspeed'], 2) . ' to '
+                            . round($summary['max_airspeed'], 2) . "</td></tr>";
             $summaryData .= '<tr><td>Altitude</td><td>' . round(
-                    $stats['avg_msl'],
+                    $summary['avg_msl'],
                     2
-                ) . '</td><td>' . round($stats['min_msl'], 2) . ' to ' . round(
-                                $stats['max_msl'],
+                ) . '</td><td>' . round($summary['min_msl'], 2) . ' to ' . round(
+                                $summary['max_msl'],
                                 2
                             ) . "</td></tr>";
             $summaryData .= '<tr><td>Engine RPM</td><td>' . round(
-                    $stats['avg_eng_rpm'],
+                    $summary['avg_eng_rpm'],
                     2
-                ) . '</td><td>' . round($stats['min_eng_rpm'], 2) . ' to '
-                            . round($stats['max_eng_rpm'], 2) . "</td></tr>";
+                ) . '</td><td>' . round($summary['min_eng_rpm'], 2) . ' to '
+                            . round($summary['max_eng_rpm'], 2) . "</td></tr>";
             $summaryData .= '<tr><td>Pitch</td><td>' . round(
-                    $stats['avg_pitch'],
+                    $summary['avg_pitch'],
                     2
-                ) . '</td><td>' . round($stats['min_pitch'], 2) . ' to '
-                            . round($stats['max_pitch'], 2) . "</td></tr>";
+                ) . '</td><td>' . round($summary['min_pitch'], 2) . ' to '
+                            . round($summary['max_pitch'], 2) . "</td></tr>";
             $summaryData .= '<tr><td>Roll</td><td>' . round(
-                    $stats['avg_roll'],
+                    $summary['avg_roll'],
                     2
-                ) . '</td><td>' . round($stats['min_roll'], 2) . ' to ' . round(
-                                $stats['max_roll'],
+                ) . '</td><td>' . round($summary['min_roll'], 2) . ' to ' . round(
+                                $summary['max_roll'],
                                 2
                             ) . "</td></tr>";
             $summaryData .= '<tr><td>Vertical Speed</td><td>' . round(
-                    $stats['avg_vert'],
+                    $summary['avg_vert'],
                     2
-                ) . '</td><td>' . round($stats['min_vert'], 2) . ' to ' . round(
-                                $stats['max_vert'],
+                ) . '</td><td>' . round($summary['min_vert'], 2) . ' to ' . round(
+                                $summary['max_vert'],
                                 2
                             ) . "</td></tr>";
             $summaryData .= '</table>';
