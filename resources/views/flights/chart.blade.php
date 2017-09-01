@@ -117,10 +117,6 @@
     <script src="https://code.highcharts.com/4.2.2/modules/exporting.js"></script>
 
     <script type="text/javascript">
-        jQuery.noConflict();
-    </script>
-
-    <script type="text/javascript">
         var spinnerVisible = false;
 
         function showProgress() {
