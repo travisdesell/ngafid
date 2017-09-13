@@ -44,7 +44,7 @@ class EncryptFlightDataCommand extends Command
             $uploadsTable = FileUpload::where('flight_id', $meta['id'])
                 ->first();
 
-            // Encrypt the n_number and day in the flight_id table
+            // Encrypt the n_number in flight_id table
             $trimmedNnumber = trim($meta['n_number']);
             if ($trimmedNnumber) {
                 openssl_public_encrypt(
@@ -59,6 +59,7 @@ class EncryptFlightDataCommand extends Command
                 );
             }
 
+            // Encrypt the day in flight_id table
             $trimmedDate = trim($meta['date']);
             if ($trimmedDate && !ends_with($trimmedDate, '00')) {
                 $day = substr($trimmedDate, -2);
@@ -92,107 +93,113 @@ class EncryptFlightDataCommand extends Command
                 $uploadsTable->save();
             }
 
-            // Encrypt the epoch and flight time in the GAARD tables
-            $gaard = DB::selectOne(
-                "SELECT id, recording_start, recording_end, COALESCE(UNCOMPRESS(recording_start), 'N') AS 'enc_start',
-                COALESCE(UNCOMPRESS(recording_end), 'N') AS 'enc_end'
-                FROM mitre_flight_meta_data
-                WHERE flight_id = {$meta['id']}"
-            );
-
-            if ($gaard) {
-                // GAARD 1
-                $values = [];
-
-                if ($gaard->enc_start === 'N') {
-                    $values[] = "`recording_start` = COMPRESS('"
-                                . base64_encode($gaard->recording_start) . "')";
-                }
-
-                if ($gaard->enc_end === 'N') {
-                    $values[] = "`recording_end` = COMPRESS('" . base64_encode(
-                            $gaard->recording_end
-                        ) . "')";
-                }
-
-                if ($values) {
-                    $sql = "UPDATE mitre_flight_meta_data SET " . implode(
-                            ',',
-                            $values
-                        ) . " WHERE flight_id = {$meta['id']}";
-
-                    DB::statement($sql);
-                }
-
-                // Update GPS data
-                $gpsData = DB::select(
-                    "SELECT id, epoch, msg_timestamp, gps_time, COALESCE(UNCOMPRESS(epoch), 'N') AS 'enc_epoch',
-                      COALESCE(UNCOMPRESS(msg_timestamp), 'N') AS 'enc_msg_timestamp', COALESCE(UNCOMPRESS(gps_time), 'N') AS 'enc_gps_time'
-                    FROM mitre_gps_data WHERE meta_data_id = {$gaard->id}"
+            // If flight is a GAARD flight, then update the data in those tables
+            if ($flightInfo->recorder_type === 'G') {
+                // Encrypt the epoch and flight time in the GAARD tables
+                $gaard = DB::selectOne(
+                    "SELECT id, recording_start, recording_end, COALESCE(UNCOMPRESS(recording_start), 'N') AS 'enc_start',
+                    COALESCE(UNCOMPRESS(recording_end), 'N') AS 'enc_end'
+                    FROM mitre_flight_meta_data
+                    WHERE flight_id = {$meta['id']}"
                 );
 
-                foreach ($gpsData as $gpsRow) {
+                if ($gaard) {
+                    // GAARD 1
                     $values = [];
 
-                    if ($gpsRow->enc_epoch === 'N') {
-                        $values[] = "`epoch` = COMPRESS('" . base64_encode(
-                                $gpsRow->epoch
-                            ) . "')";
-                    }
-
-                    if ($gpsRow->enc_msg_timestamp === 'N') {
-                        $values[] = "`msg_timestamp` = COMPRESS('"
-                                    . base64_encode($gpsRow->msg_timestamp)
+                    if ($gaard->enc_start === 'N') {
+                        $values[] = "`recording_start` = COMPRESS('"
+                                    . base64_encode($gaard->recording_start)
                                     . "')";
                     }
 
-                    if ($gpsRow->enc_gps_time === 'N') {
-                        $values[] = "`gps_time` = COMPRESS('" . base64_encode(
-                                $gpsRow->gps_time
-                            ) . "')";
+                    if ($gaard->enc_end === 'N') {
+                        $values[] = "`recording_end` = COMPRESS('"
+                                    . base64_encode(
+                                        $gaard->recording_end
+                                    ) . "')";
                     }
 
                     if ($values) {
-                        $sql = "UPDATE mitre_gps_data SET " . implode(
+                        $sql = "UPDATE mitre_flight_meta_data SET " . implode(
                                 ',',
                                 $values
-                            ) . " WHERE id = {$gpsRow->id}";
+                            ) . " WHERE flight_id = {$meta['id']}";
 
                         DB::statement($sql);
                     }
-                }
-            } else {
-                // GAARD 2
 
-                // Update GPS data
-                $gpsData = DB::select(
-                    "SELECT id, epoch_time, COALESCE(UNCOMPRESS(epoch_time), 'N') AS 'enc_epoch_time'
-                    FROM mitre_gaard2_loc WHERE flight = {$meta['id']}"
-                );
+                    // Update GPS data
+                    $gpsData = DB::select(
+                        "SELECT id, epoch, msg_timestamp, gps_time, COALESCE(UNCOMPRESS(epoch), 'N') AS 'enc_epoch',
+                          COALESCE(UNCOMPRESS(msg_timestamp), 'N') AS 'enc_msg_timestamp', COALESCE(UNCOMPRESS(gps_time), 'N') AS 'enc_gps_time'
+                        FROM mitre_gps_data WHERE meta_data_id = {$gaard->id}"
+                    );
 
-                foreach ($gpsData as $gpsRow) {
-                    if ($gpsRow->enc_epoch_time === 'N') {
-                        $sql = "UPDATE mitre_gaard2_loc SET epoch_time = COMPRESS('"
-                               . base64_encode($gpsRow->epoch_time)
-                               . "') WHERE id = {$gpsRow->id}";
+                    foreach ($gpsData as $gpsRow) {
+                        $values = [];
 
-                        DB::statement($sql);
+                        if ($gpsRow->enc_epoch === 'N') {
+                            $values[] = "`epoch` = COMPRESS('" . base64_encode(
+                                    $gpsRow->epoch
+                                ) . "')";
+                        }
+
+                        if ($gpsRow->enc_msg_timestamp === 'N') {
+                            $values[] = "`msg_timestamp` = COMPRESS('"
+                                        . base64_encode($gpsRow->msg_timestamp)
+                                        . "')";
+                        }
+
+                        if ($gpsRow->enc_gps_time === 'N') {
+                            $values[] = "`gps_time` = COMPRESS('"
+                                        . base64_encode(
+                                            $gpsRow->gps_time
+                                        ) . "')";
+                        }
+
+                        if ($values) {
+                            $sql = "UPDATE mitre_gps_data SET " . implode(
+                                    ',',
+                                    $values
+                                ) . " WHERE id = {$gpsRow->id}";
+
+                            DB::statement($sql);
+                        }
                     }
-                }
+                } else {
+                    // GAARD 2
 
-                // Update AHRS data
-                $ahrsData = DB::select(
-                    "SELECT id, epoch_time, COALESCE(UNCOMPRESS(epoch_time), 'N') AS 'enc_epoch_time'
-                    FROM mitre_gaard2_ahrs WHERE flight = {$meta['id']}"
-                );
+                    // Update GPS data
+                    $gpsData = DB::select(
+                        "SELECT id, epoch_time, COALESCE(UNCOMPRESS(epoch_time), 'N') AS 'enc_epoch_time'
+                        FROM mitre_gaard2_loc WHERE flight = {$meta['id']}"
+                    );
 
-                foreach ($ahrsData as $ahrsRow) {
-                    if ($ahrsRow->enc_epoch_time === 'N') {
-                        $sql = "UPDATE mitre_gaard2_ahrs SET epoch_time = COMPRESS('"
-                               . base64_encode($ahrsRow->epoch_time)
-                               . "') WHERE id = {$ahrsRow->id}";
+                    foreach ($gpsData as $gpsRow) {
+                        if ($gpsRow->enc_epoch_time === 'N') {
+                            $sql = "UPDATE mitre_gaard2_loc SET epoch_time = COMPRESS('"
+                                   . base64_encode($gpsRow->epoch_time)
+                                   . "') WHERE id = {$gpsRow->id}";
 
-                        DB::statement($sql);
+                            DB::statement($sql);
+                        }
+                    }
+
+                    // Update AHRS data
+                    $ahrsData = DB::select(
+                        "SELECT id, epoch_time, COALESCE(UNCOMPRESS(epoch_time), 'N') AS 'enc_epoch_time'
+                        FROM mitre_gaard2_ahrs WHERE flight = {$meta['id']}"
+                    );
+
+                    foreach ($ahrsData as $ahrsRow) {
+                        if ($ahrsRow->enc_epoch_time === 'N') {
+                            $sql = "UPDATE mitre_gaard2_ahrs SET epoch_time = COMPRESS('"
+                                   . base64_encode($ahrsRow->epoch_time)
+                                   . "') WHERE id = {$ahrsRow->id}";
+
+                            DB::statement($sql);
+                        }
                     }
                 }
             }
