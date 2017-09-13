@@ -54,9 +54,9 @@
                             <div class="row">
                                 <span class="pull-left col-md-12"><b>GAARD App Screenshots</b></span>
                                 <div class="col-xs-12">
-                                    <div class="col-xs-4"><img class="img-responsive" src="{{ asset('images/gaardImg1.png') }}" height="75"/></div>
-                                    <div class="col-xs-4"><img class="img-responsive" src="{{ asset('images/gaardImg2.png') }}" height="75"/></div>
-                                    <div class="col-xs-4"><img class="img-responsive" src="{{ asset('images/gaardImg3.png') }}" height="75"/></div>
+                                    <div class="col-xs-4"><img class="img-responsive" src="{{ elixir('images/gaardImg1.png') }}" height="75"/></div>
+                                    <div class="col-xs-4"><img class="img-responsive" src="{{ elixir('images/gaardImg2.png') }}" height="75"/></div>
+                                    <div class="col-xs-4"><img class="img-responsive" src="{{ elixir('images/gaardImg3.png') }}" height="75"/></div>
                                 </div>
                             </div>
                         </p>
