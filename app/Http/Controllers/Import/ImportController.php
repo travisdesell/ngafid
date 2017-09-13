@@ -53,7 +53,6 @@ class ImportController extends Controller {
 
             $uploadID = $uploadsTable->id;
             \Queue::pushOn('webImport', new ProcessImportCommand($uploadID)); //it seems this processes the file synchronously
-            //$this->dispatch(new ProcessImportCommand($uploadID));
 
             chmod($path, 0777);
 
@@ -70,7 +69,7 @@ class ImportController extends Controller {
     {
         // Only show C172S, C182, Piper Seminole PA44, Piper Archer PA28, Cirrus SR20
         $aircraftTable = new Aircraft();
-        $aircraftInfo = $aircraftTable->whereIn('id', [1, 2, 6, 7, 8, 192])->orderBy('aircraft name', 'ASC')->get();
+        $aircraftInfo = $aircraftTable->whereIn('id', [1, 2, 6, 7, 8, 192])->orderBy('aircraft name', 'ASC')->get();  // Only show C172, C182, PA44, PA28, SR20
 
         $aircraftData[''] = 'Select Aircraft';
         foreach($aircraftInfo as $aircraft)
@@ -86,9 +85,8 @@ class ImportController extends Controller {
     {
         $fleetID        = \Auth::user()->org_id;
         $userID         = \Auth::user()->id;
-        $uploadsTable   = new FileUpload();
 
-        $importedFlights = $uploadsTable->importStatus($userID, $fleetID)->paginate($this->perPage);
+        $importedFlights = FileUpload::importStatus($userID, $fleetID)->paginate($this->perPage);
         return view('import.status')->with(['data' => $importedFlights]);
     }
 
