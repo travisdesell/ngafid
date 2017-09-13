@@ -22,9 +22,13 @@ class ToggleEncryption
         if (Auth::check()) {
             $enrolledInEncryption = Auth::user()->fleet->wantsDataEncrypted();
             $secretKey = $request->input('secretKey');
-            $toggle = 'T';
-
             $session = $request->session();
+
+            $toggle = $request->input('toggle') === 'F'
+                      || $session->get('toggleEnc') === 'F'
+                ? 'F'
+                : 'T';
+
             if ($request->input('toggle') === 'T') {
                 $session->forget('encrSK');
                 $session->forget('toggleEnc');
@@ -32,23 +36,19 @@ class ToggleEncryption
                 $session->save();
 
                 flash()->success(
-                    'Encryption On: You are now viewing your encrypted flight data.'
+                    '<strong>Encryption On!</strong> You are now viewing your encrypted flight data.'
                 );
 
                 return redirect(URL::previous());
             }
 
-            if ($request->input('toggle') === 'F'
-                || $session->get('toggleEnc') === 'F') {
-                $toggle = 'F';
-            }
-
             if (strpos($request->path(), 'decrypt') !== false
                 && $enrolledInEncryption) {
                 if ( !str_contains(URL::previous(), 'decrypt')) {
-                    $session->put('prevURL', URL::previous());
-                    $session->save();
+                    $session->put('prevURL', $session->previousUrl());
                 }
+
+                $session->keep(['flash_notification.level', 'flash_notification.message']);
 
                 if ($toggle === 'F' && count($secretKey) > 0) {
                     $salt = getenv('STATIC_SALT');
@@ -72,12 +72,14 @@ class ToggleEncryption
                         $session->save();
 
                         flash()->success(
-                            'Encryption Off: You are now viewing your decrypted flight data.'
+                            '<strong>Encryption Off! </strong> You are now viewing your decrypted flight data.'
                         );
 
                         return redirect($session->get('prevURL'));
                     } else {
-                        flash()->error('Incorrect secret key.');
+                        flash()->error('<strong>Whoops!</strong> Incorrect secret key.');
+
+                        return redirect()->back();
                     }
                 } else {
                     $session->put('toggleEnc', 'T');
@@ -90,7 +92,7 @@ class ToggleEncryption
                     && count($secretKey) <= 0) {
                     $session->setPreviousUrl($request->url());
 
-                    flash()->info(
+                    flash()->warning(
                         'Please disable the encryption before editing your flight data.'
                     );
 
