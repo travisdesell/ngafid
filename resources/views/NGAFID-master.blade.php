@@ -23,8 +23,8 @@
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
-    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
 </head>
 <body>
@@ -120,8 +120,10 @@
 
     <!-- Scripts -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="{{ elixir('js/jquery.min.js') }}"><\/script>')</script>
+
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-    <script src="{{ elixir("js/vendor.js") }}"></script>
+    <script src="{{ elixir('js/vendor.js') }}"></script>
 
     <script>
         $(function () {
@@ -141,8 +143,8 @@
                     console.log('Toggle: ' + $(this).prop('checked'));
 
                     window.location.href = $(this).prop('checked')
-                    ? "{{ url('/decrypt?toggle=T') }}"
-                    : "{{ url('/decrypt?toggle=F') }}";
+                        ? "{{ url('/decrypt?toggle=T') }}"
+                        : "{{ url('/decrypt?toggle=F') }}";
                 }
             });
         })
@@ -155,7 +157,7 @@
             <div id="copyright">
                 &copy; Copyright {{ date("Y") }}
                 National General Aviation Flight Information Database
-                <img class="pull-right" src="{{ asset('images/aerospace-logo.png') }}" height="17" alt="UND Aerospace">
+                <img class="pull-right" src="{{ elixir('images/aerospace-logo.webp') }}" height="17" alt="UND Aerospace">
             </div>
         </div>
     </div>

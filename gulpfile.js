@@ -1,5 +1,7 @@
 var elixir = require('laravel-elixir');
 
+require('laravel-elixir-images');
+
 /*
  |--------------------------------------------------------------------------
  | Elixir Asset Management
@@ -13,19 +15,33 @@ var elixir = require('laravel-elixir');
 
 elixir(function(mix) {
     mix
+        .copy("resources/assets/images/*.ico", "public/images")
+        .copy("resources/assets/images/*.gif", "public/images")
+        .images([
+            "*.png",
+            "*.jpg"
+        ], "public/images", {
+            webp: false,
+            sizes: [[]],  // Only generate original image size
+            optimize: true
+        })
         .styles([
             "app.css",
-            "./vendor/nostalgiaz/bootstrap-switch/dist/css/bootstrap3/bootstrap-switch.min.css"
+            "./node_modules/bootstrap-switch/dist/css/bootstrap3/bootstrap-switch.min.css"
         ], "public/css/vendor.css")
         .styles([
             "custom.css"
         ], "public/css/custom.css")
         .scripts([
-            "./vendor/nostalgiaz/bootstrap-switch/dist/js/bootstrap-switch.min.js"
+            "./node_modules/bootstrap-switch/dist/js/bootstrap-switch.min.js"
         ], "public/js/vendor.js")
+        .scripts([
+            "./node_modules/jquery/dist/jquery.min.js"
+        ], "public/js/jquery.min.js")
         .version([
-            "css/vendor.css",
-            "css/custom.css",
-            "js/vendor.js"
+            "images",
+            "css",
+            "js"
         ]);
+
 });

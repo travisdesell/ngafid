@@ -1,11 +1,11 @@
 
 html, body {
-    background: url('../../images/clouds.jpg') no-repeat center center fixed;
+    background: url('../../images/clouds.webp') no-repeat center center fixed;
     -webkit-background-size: cover;
     -moz-background-size: cover;
     -o-background-size: cover;
     background-size: cover;
-    height:100%;
+    height: 100%;
 }
 
 .navbar, .footer {
@@ -13,26 +13,30 @@ html, body {
     background: transparent;
 }
 
+/*change nav-bar selected tab color*/
 .navbar-default .navbar-nav > .open > a,
 .navbar-default .navbar-nav > .open > a:hover,
 .navbar-default .navbar-nav > .open > a:focus {
     background-color: rgba(235, 250, 255, 0.9) !important;
-}/*change nav-bar selected tab color*/
+}
 
-.navbar-default .navbar-nav .open .dropdown-menu>li>a,
+/*change nav-bar dropdown background color*/
+.navbar-default .navbar-nav .open .dropdown-menu > li > a,
 .navbar-default .navbar-nav .open .dropdown-menu {
     background-color: rgba(235, 250, 255, 0.7) !important;
-} /*change nav-bar dropdown background color*/
+}
 
-.navbar-default .navbar-nav .open .dropdown-menu>li>a:hover{
+/*change nav-bar dropdown hover color*/
+.navbar-default .navbar-nav .open .dropdown-menu > li > a:hover {
     background-color: #ffffff !important;
-} /*change nav-bar dropdown hover color*/
+}
 
+/*change nav-bar hover color*/
 .navbar-default .navbar-nav > li > a:hover,
 .nav > li > a:focus {
     text-decoration: none;
     background-color: rgba(235, 250, 255, 0.5);
-}/*change nav-bar hover color*/
+}
 
 .dropdown-menu > li > a:hover,
 .dropdown-menu > li > a:focus {
@@ -47,7 +51,7 @@ html, body {
     color: #000;
 }
 
-.navbar-default .navbar-toggle:hover{
+.navbar-default .navbar-toggle:hover {
     background-color: rgba(235, 250, 255, 0.9) !important;
     border-color: #ffffff;
 }
@@ -66,44 +70,38 @@ html, body {
 
 .panel-default > .panel-heading {
     color: #333;
-    background-color: rgba( 240, 255, 255, 0.7) !important;
+    background-color: rgba(240, 255, 255, 0.7) !important;
 }
 
-.progress-bar
-{
+.progress-bar {
     color: black !important;
     text-align: center;
 }
-.popover-title{
+
+.popover-title {
     background: #4682b4;
     color: #ffffff;
 }
 
-.list-group-item{
+.list-group-item {
     padding-bottom: 0px;
-    /*
-    border-color: #ffffff !important;
-    border: 0;
-    */
 }
 
 #container {
-    height:60%;
+    height: 60%;
 }
-.popover{
+
+.popover {
     max-width: 100%;
 }
-/*.popover #div{
-    width:100%;
-    white-space:pre-wrap;
-}*/
-.popover-title{
+
+.popover-title {
     background: #4682b4;
     color: #ffffff;
 }
 
 th {
-    background-color: rgba( 245, 255, 250, 0.8);
+    background-color: rgba(245, 255, 250, 0.8);
 }
 
 @media only screen and (max-width: 800px) {
@@ -123,7 +121,9 @@ th {
         left: -9999px;
     }
 
-    #no-more-tables tr { border: 1px solid #ccc; }
+    #no-more-tables tr {
+        border: 1px solid #ccc;
+    }
 
     #no-more-tables td {
         border: none;
@@ -131,7 +131,7 @@ th {
         position: relative;
         padding-left: 50%;
         /*white-space: normal;*/
-        text-align:left;
+        text-align: left;
     }
 
     #no-more-tables td:before {
@@ -141,11 +141,13 @@ th {
         width: 45%;
         padding-right: 10px;
         white-space: nowrap;
-        text-align:left;
+        text-align: left;
         font-weight: bold;
     }
 
-    #no-more-tables td:before { content: attr(data-title); }
+    #no-more-tables td:before {
+        content: attr(data-title);
+    }
 }
 
 /*# sourceMappingURL=custom.css.map */
