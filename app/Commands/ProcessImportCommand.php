@@ -51,6 +51,7 @@ class ProcessImportCommand extends Command
      * Execute the command.
      *
      * @return void
+     * @throws \Exception
      */
     public function handle()
     {
@@ -117,7 +118,9 @@ class ProcessImportCommand extends Command
             File::delete($this->newFilePath);
 
             // Throw an exception so job will be added to failed_jobs
-            throw new Exception('Unsupported file format. Error Type: Invalid flight data, 0 valid rows found in CSV.');
+            throw new Exception(
+                'Unsupported file format. Error Type: Invalid flight data, 0 valid rows found in CSV.'
+            );
         }
 
         // Delete temp file
@@ -502,10 +505,9 @@ class ProcessImportCommand extends Command
         $validRowCtr = 0;
 
         // Start loop at the next line after the headers
-        for ($idx = $headerLineIdx + 1; $headerLineIdx < $linesLength; $idx++) {
+        for ($idx = $headerLineIdx + 1; $idx < $linesLength; $idx++) {
             // Loop through each line of the csv. Ignore comments and prepare a
             // new file for import only with the required fields.
-
             $line = $lines[$idx];
 
             if (starts_with($line, '#')) {
@@ -519,13 +521,14 @@ class ProcessImportCommand extends Command
                 $flippedNewHeader
             );
 
-            if ($validRowCtr == 0) {
-                // Extract the date and time from first valid line of data
-                $this->flightDate = Carbon::parse($newLine['Lcl Date'])
-                    ->format('Y-m-d');
-                $this->flightTime = Carbon::parse($newLine['Lcl Time'])
-                    ->format('H:i:s');
+            // Check to see if $newLine was returned as false (meaning that the
+            // lengths of the data array & header arrays are not equal.
+            // We'll just skip this line since it's corrupted.
+            if ($newLine === false) {
+                continue;
+            }
 
+            if ($validRowCtr == 0) {
                 // If 'Lcl Date' and 'Lcl Time' fields are not found,
                 // the import should be terminated and log table updated
                 if ( !$newLine['Lcl Date'] || !$newLine['Lcl Time']) {
@@ -537,6 +540,12 @@ class ProcessImportCommand extends Command
                         'Unsupported file format. Error Type: Invalid flight date/time'
                     );
                 }
+
+                // Extract the date and time from first valid line of data
+                $this->flightDate = Carbon::parse($newLine['Lcl Date'])
+                    ->format('Y-m-d');
+                $this->flightTime = Carbon::parse($newLine['Lcl Time'])
+                    ->format('H:i:s');
             }
 
             File::append($newFileName, implode(',', $newLine) . "\r\n");
