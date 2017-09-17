@@ -103,18 +103,18 @@
     </ul>
 </li>
 
-<li class="dropdown">
-    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-        Approach Analysis <span class="caret"></span>
-    </a>
-    <ul class="dropdown-menu" role="menu">
-        @if (Auth::user()->org_id === 1 || Auth::user()->org_id === 89)
+@if (Auth::user()->org_id === 1 || Auth::user()->org_id === 89)
+    <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+            Approach Analysis <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu" role="menu">
             <li>
                 <a href="{{ url('approach/analysis') }}">Stabilized Approach</a>
             </li>
-        @endif
-        <li>
-            <a href="{{ url('approach/selfdefined') }}">Self Defined</a>
-        </li>
-    </ul>
-</li>
+            {{--<li>--}}
+                {{--<a href="{{ url('approach/selfdefined') }}">Self Defined</a>--}}
+            {{--</li>--}}
+        </ul>
+    </li>
+@endif
