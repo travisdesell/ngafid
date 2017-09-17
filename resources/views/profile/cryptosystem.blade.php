@@ -13,20 +13,22 @@
                     <div class="panel-body">
                         @include('partials.errors')
 
-                        <p>
-                            Enabling data encryption will encrypt the N Number
-                            and Day of each flight. After you have successfully
-                            enabled encryption, all previous flights
-                            will be retroactively encrypted as well as any
-                            flights uploaded in the future. This will include
-                            all flights uploaded by any user registered under
-                            your fleet. Only the fleet administrator is able to
-                            enroll in data encryption.
-                        </p>
-                        <p class="text-warning">
-                            After encryption has been enabled, it is not
-                            possible to disable it.
-                        </p>
+                        <div class="well">
+                            <p>
+                                Enabling data encryption will encrypt the N Number
+                                and Day of each flight. After you have successfully
+                                enabled encryption, all previous flights
+                                will be retroactively encrypted as well as any
+                                flights uploaded in the future. This will include
+                                all flights uploaded by any user registered under
+                                your fleet. Only the fleet administrator is able to
+                                enroll in data encryption.
+                            </p>
+                            <p class="text-warning">
+                                After encryption has been enabled, it is not
+                                possible to disable it.
+                            </p>
+                        </div>
 
                         {!! Form::open(['method' => 'POST', 'url' => 'generate', 'class' => 'form-horizontal']) !!}
                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
