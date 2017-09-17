@@ -19,7 +19,7 @@ class ToggleEncryption
      */
     public function handle($request, Closure $next)
     {
-        if (Auth::check()) {
+        if (Auth::check() && Auth::user()->isFleetAdministrator()) {
             $enrolledInEncryption = Auth::user()->fleet->wantsDataEncrypted();
             $secretKey = $request->input('secretKey');
             $session = $request->session();

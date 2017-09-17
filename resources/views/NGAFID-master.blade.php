@@ -96,16 +96,18 @@
                 @if (Auth::check())
                     <form class="navbar-form navbar-right form-horizontal">
                         <div class="form-group">
-                            @if (Auth::user()->fleet->wantsDataEncrypted())
-                                {{-- Fleet is enrolled in encryption, show a toggle for them to either show their flight data encrypted (toggle='On') or decrypted (toggle='Off') --}}
-                                <div class="checkbox">
-                                    <input type="checkbox" id="toggleEncryption" {{ Session::get('toggleEnc') === 'F' ? '' : 'checked' }}>
-                                </div>
-                            @else
-                                {{-- Fleet has not signed up for encryption yet, give them a button to enroll --}}
-                                <a href="{{ url('cryptosystem') }}" class="btn btn-sm" data-toggle="tooltip" data-placement="bottom" title="Click to Enroll">
-                                    Enable Encryption
-                                </a>
+                            @if (Auth::user()->isFleetAdministrator())
+                                @if (Auth::user()->fleet->wantsDataEncrypted())
+                                    {{-- Fleet is enrolled in encryption, show a toggle for them to either show their flight data encrypted (toggle='On') or decrypted (toggle='Off') --}}
+                                    <div class="checkbox">
+                                        <input type="checkbox" id="toggleEncryption" {{ Session::get('toggleEnc') === 'F' ? '' : 'checked' }}>
+                                    </div>
+                                @else
+                                    {{-- Fleet has not signed up for encryption yet, give them a button to enroll --}}
+                                    <a href="{{ url('cryptosystem') }}" class="btn btn-sm btn-default" data-toggle="tooltip" data-placement="bottom" title="Click to Enroll">
+                                        Enable Encryption
+                                    </a>
+                                @endif
                             @endif
                         </div>
                     </form>

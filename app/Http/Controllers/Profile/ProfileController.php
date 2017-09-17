@@ -131,7 +131,7 @@ class ProfileController extends Controller
 
     public function initCryptoSystem()
     {
-        if (Auth::check()) {
+        if (Auth::check() && Auth::user()->isFleetAdministrator()) {
             return view('profile.cryptosystem');
         }
 
@@ -189,7 +189,7 @@ class ProfileController extends Controller
 
                 flash()->success('Encryption is now enabled.');
 
-                // Retroactively encrypt the user's data
+                // Retroactively encrypt the user's data with a queued job
                 Queue::pushOn(
                     'encryptionQueue',
                     new EncryptFlightDataCommand($fleetID)
