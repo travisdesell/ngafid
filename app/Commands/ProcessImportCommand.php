@@ -62,7 +62,7 @@ class ProcessImportCommand extends Command
             // Error found with the file, stop processing
             File::delete($this->newFilePath);
 
-            throw new \Exception("No valid lines were found in the CSV file.");
+            throw new Exception("No valid lines were found in the CSV file.");
         }
 
         if ($this->csvRowCtr > 0) {
@@ -104,7 +104,6 @@ class ProcessImportCommand extends Command
                 );
             } else {
                 // 'flight found'
-
                 $this->upload->import_notes = 'You have an existing flight matching the date/time.';
                 $this->upload->error = 1;
                 $this->upload->save();
@@ -239,7 +238,7 @@ class ProcessImportCommand extends Command
         $importFileName = "{$this->upload->path}import_{$this->upload->file_name}";
         File::put(
             $importFileName,
-            'Time,RadioAltitude,' . $this->newFileHeaders . "\r\n"
+            'Time,RadioAltitude,' . $this->newFileHeaders . "\n"
         );
 
         $headers = preg_split('/\s*,\s*/', trim($this->newFileHeaders));
@@ -277,7 +276,7 @@ class ProcessImportCommand extends Command
                 $time[$ctr] . ',' . $radioAltitude[$ctr] . ',' . implode(
                     ',',
                     $row
-                )
+                ) . "\n"
             );
 
             $csvPrevTime = $csvCurTime;
@@ -296,9 +295,7 @@ class ProcessImportCommand extends Command
     ) {
         $timeDiffMs = $curTime->diffInSeconds($prevTime) * 1000;
 
-        return $prevTimeMs + ($timeDiffMs !== 0
-                ? $timeDiffMs
-                : 1);
+        return $prevTimeMs + ($timeDiffMs !== 0 ? $timeDiffMs : 1);
     }
 
     private function deriveRadioAltitude($msl, $latitude, $longitude)
