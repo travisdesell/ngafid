@@ -79,7 +79,7 @@
                                     <a href="{{ url('/faq') }}">FAQ's</a>
                                 </li>
                                 <li>
-                                    <a href="mailto:dusenbur@aero.und.edu?cc=bwild@aero.und.edu;kelton.karboviak@und.edu">
+                                    <a href="{{ env('MAILTO_STRING') }}">
                                         Contact Us
                                     </a>
                                 </li>
