@@ -15,6 +15,7 @@ require('laravel-elixir-images');
 
 elixir(function(mix) {
     mix
+        .copy("resources/assets/fonts", "public/build/fonts")
         .copy("resources/assets/images/*.ico", "public/images")
         .copy("resources/assets/images/*.gif", "public/images")
         .images([
@@ -43,5 +44,4 @@ elixir(function(mix) {
             "css",
             "js"
         ]);
-
 });
