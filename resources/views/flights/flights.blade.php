@@ -431,13 +431,12 @@
     <script src="//code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
 
     <script type="text/javascript">
-
         var datePickerOptions = {
             changeYear: true,
             dateFormat: 'yy-mm-dd'
         };
 
-        $(function () {
+        (function ($) {
             $("#startDatepicker").datepicker(datePickerOptions);
             $("#endDatepicker").datepicker(datePickerOptions);
 
@@ -589,27 +588,28 @@
                     }
                 });
             });
-        });
+
+
+            var spinnerVisible = false;
+
+            function showProgress() {
+                if (!spinnerVisible) {
+                    $("div#spinner").fadeIn("fast");
+                    spinnerVisible = true;
+                }
+            }
+
+            function hideProgress() {
+                if (spinnerVisible) {
+                    $("div#spinner").fadeOut("fast");
+                    spinnerVisible = false;
+                }
+            }
+        })(jQuery);
 
         $(window).on('hashchange', function (e) {
             history.replaceState("", document.title, e.originalEvent.oldURL);
         });
-
-        var spinnerVisible = false;
-
-        function showProgress() {
-            if (!spinnerVisible) {
-                $("div#spinner").fadeIn("fast");
-                spinnerVisible = true;
-            }
-        }
-
-        function hideProgress() {
-            if (spinnerVisible) {
-                $("div#spinner").fadeOut("fast");
-                spinnerVisible = false;
-            }
-        }
 
 //        $(document).on("click", ".open-DownloadModal", function () {
 //            var url = $(this).attr('data-id');
