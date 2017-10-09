@@ -103,7 +103,7 @@
     </ul>
 </li>
 
-@if (Auth::user()->org_id === 1 || Auth::user()->org_id === 89)
+@if ($fleetID == 1 || $fleetID == 89)
     <li class="dropdown">
         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
             Approach Analysis <span class="caret"></span>
