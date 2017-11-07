@@ -80,7 +80,7 @@ class DashboardController extends Controller {
                 'lowAirspeedClimbout'   =>  'Low Airspeed on Climb-out is defined as the aircraft\'s Indicated Airspeed (IAS) decreases below 55 knots on climb-out'
             );
 
-            $exceedanceStats = $flightIdTable->exceedanceStats($fleetID);
+            $exceedanceStats = $flightIdTable->exceedanceStats($fleetID)->get();
 
             $excessiveRoll    = 0;
             $excessivePitch   = 0;
@@ -88,7 +88,7 @@ class DashboardController extends Controller {
             $excessiveVert    = 0;
             $excessiveLon     = 0;
             $excessiveVSI     = 0;
-            $totalFlightsByAircraft = $flightIdTable->totalFlightsByAircraft($fleetID);
+            $totalFlightsByAircraft = $flightIdTable->totalFlightsByAircraft($fleetID)->get();
 
             $totalC172  = 0;
             $totalC182  = 0;

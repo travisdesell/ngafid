@@ -229,7 +229,8 @@ class FlightID extends Eloquent
     ) {
         $query->select(
             DB::raw(
-                "CONCAT(aircraft_list.`aircraft name`, ' - ', COALESCE(aircraft_list.`year`, ''), ' ', COALESCE(aircraft_list.make, ''), ' ', COALESCE(aircraft_list.model, '')) AS 'aircraft',
+                "flight_id.aircraft_type,
+                    CONCAT(aircraft_list.`aircraft name`, ' - ', COALESCE(aircraft_list.`year`, ''), ' ', COALESCE(aircraft_list.make, ''), ' ', COALESCE(aircraft_list.model, '')) AS 'aircraft',
                     SUM(CASE WHEN excessive_roll = 'Y' THEN 1 ELSE NULL END) AS 'ExcessiveRoll',
                     SUM(CASE WHEN excessive_pitch = 'Y' THEN 1 ELSE NULL END) AS 'ExcessivePitch',
                     SUM(CASE WHEN excessive_speed = 'Y' THEN 1 ELSE NULL END) AS 'ExcessiveSpeed',
@@ -286,7 +287,7 @@ class FlightID extends Eloquent
     {
         return $query->select(
             DB::raw(
-                "aircraft_list.`aircraft name` AS 'name', COUNT(flight_id.id) AS 'y'"
+                "aircraft_type AS 'aircraft_id', COUNT(*) AS 'total', aircraft_list.`aircraft name` AS 'name', COUNT(flight_id.id) AS 'y'"
             )
         )
             ->leftJoin(
