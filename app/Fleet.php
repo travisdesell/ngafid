@@ -92,7 +92,7 @@ class Fleet extends Eloquent
         'encrypt_data',
     ];
 
-    /*************************************************************************-
+    /*************************************************************************
      * Model Scopes
      */
 
@@ -131,6 +131,6 @@ class Fleet extends Eloquent
 
     public function isUND()
     {
-        return $this->id === 1 || $this->id === 3;
+        return in_array($this->id, [1, 3]);
     }
 }

@@ -26,7 +26,6 @@ return [
     |
     */
 
-    //'default' => 'mysql', changed on: 05/29/2015
     'default' => 'fdm',
 
     /*

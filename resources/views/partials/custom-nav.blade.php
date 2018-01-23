@@ -39,8 +39,8 @@
         </li>
 
         <?php
-        $fleetID = Auth::user()->org_id;
-        $aircraftTypes = NGAFID\Aircraft::uniqueAircraft($fleetID)
+        $fleet = Auth::user()->fleet;
+        $aircraftTypes = NGAFID\Aircraft::uniqueAircraft($fleet->id)
             ->get()
             ->lists('id');
         ?>
@@ -103,7 +103,7 @@
     </ul>
 </li>
 
-@if ($fleetID == 1 || $fleetID == 89)
+@if ($fleet->isUND())
     <li class="dropdown">
         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
             Approach Analysis <span class="caret"></span>
