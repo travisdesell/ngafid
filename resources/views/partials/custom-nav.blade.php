@@ -116,5 +116,8 @@
         <li>
             <a href="{{ url('approach/selfdefined') }}">Self Defined</a>
         </li>
+        <li>
+            <a href="{{ url('approach/go-around') }}">Go-Around Detection</a>
+        </li>
     </ul>
 </li>

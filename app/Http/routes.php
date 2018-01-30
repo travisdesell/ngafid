@@ -63,6 +63,8 @@ Route::get('approach/selfdefined/', 'SelfDefinedApproach\SelfDefinedApproachCont
 Route::get('approach/selfdefined/chart', 'SelfDefinedApproach\SelfDefinedApproachController@chart');
 Route::get('approach/selfdefined/flights', 'SelfDefinedApproach\SelfDefinedApproachController@flights');
 
+Route::get('approach/go-around', 'ApproachController@index');
+
 Route::controllers([
     'auth' => 'Auth\AuthController',
     'password' => 'Auth\PasswordController',
