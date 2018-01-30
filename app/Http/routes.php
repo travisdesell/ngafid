@@ -49,6 +49,9 @@ Route::get('import/status', 'Import\ImportController@status');
 Route::get('import/upload', 'Import\ImportController@upload');
 Route::resource('import', 'Import\ImportController', ['only' => ['store', 'create']]);
 
+Route::get('airports', 'AirportController@autocomplete');
+Route::get('runways', 'RunwayController@autocomplete');
+
 Route::get('approach', 'StabilizedApproach\StabilizedApproachController@index');
 Route::get('approach/index/', 'StabilizedApproach\StabilizedApproachController@index');
 Route::get('approach/analysis/', 'StabilizedApproach\StabilizedApproachController@analysis');
