@@ -1,6 +1,6 @@
 <?php namespace NGAFID\Http\Controllers\SelfDefinedApproach;
 
-use NGAFID\Airports;
+use NGAFID\Airport;
 use NGAFID\SelfDefinedApproach;
 use NGAFID\FlightID;
 use NGAFID\Http\Controllers\Controller;

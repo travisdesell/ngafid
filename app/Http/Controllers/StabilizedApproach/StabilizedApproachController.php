@@ -1,6 +1,6 @@
 <?php namespace NGAFID\Http\Controllers\StabilizedApproach;
 
-use NGAFID\Airports;
+use NGAFID\Airport;
 use NGAFID\StabilizedApproach;
 use NGAFID\FlightID;
 use NGAFID\Http\Controllers\Controller;
@@ -38,9 +38,7 @@ class StabilizedApproachController extends Controller{
             $selectedDate = date('Y') . '-' . date('m');
         }
 
-        $airports = [''=>'Select Runway']; // +  Airports::select(\DB::raw("CONCAT(airportCode, ' ', runway) AS runway, id"))->orderBy('runway')->lists('runway', 'id');
-        //$items = Airports::orderBy('airportCode')->lists('airportCode', 'runway', 'id');
-        //var_dump($airports);
+        $airports = ['' => 'Select Runway'];
 
         switch($selectedAnalysis){
             case 'CTE': $param = $selectedAnalysis;
@@ -3992,7 +3990,7 @@ class StabilizedApproachController extends Controller{
     public function runways()
     {
         $code = \Request::query('code');
-        $airports = [0 => 'Select Runway'] +  Airports::select(\DB::raw("CONCAT(airportCode, ' ', runway) AS runway, id"))->where('airportCode', '=', substr($code, 1))->orderBy('runway')->lists('runway', 'id');
+        $airports = [0 => 'Select Runway'] + Airport::select(\DB::raw("CONCAT(airportCode, ' ', runway) AS runway, id"))->where('airportCode', '=', substr($code, 1))->orderBy('runway')->lists('runway', 'id');
 
         return \Response::json(['data' => $airports]);
     }
