@@ -1,10 +1,13 @@
 <?php
 namespace NGAFID\Http\Controllers;
 
+use Auth;
+use NGAFID\Approach;
 use NGAFID\Http\Requests;
 use NGAFID\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
+use Response;
 
 class ApproachController extends Controller
 {
@@ -41,6 +44,45 @@ class ApproachController extends Controller
 
     public function chart(Request $request)
     {
+        $startDates = $request->get('startDates');
+        $endDates = $request->get('endDates');
+        $approachParams = [
+            ['crosstrack', 5.0],
+            ['heading', 1.0],
+            ['ias', 5.0],
+            ['vsi', 50.0],
+        ];
+
+        $zippedDates = array_map(null, $startDates, $endDates);
+        $results = [];
+
+        foreach ($zippedDates as list($start, $end)) {
+            $key = "$start => $end";
+            $results[$key] = [];
+            $approachParamValues = Approach::whereHas('flight', function ($flight) use ($start, $end) {
+                return $flight->where('fleet_id', '=', Auth::user()->org_id)
+                    ->whereBetween('date', [$start, $end]);
+            })->get()->map(function ($approach) {
+                return [
+                    'id' => $approach->flight_id,
+                    'crosstrack' => $approach->f2_crosstrack ?: $approach->all_crosstrack,
+                    'heading' => $approach->f1_heading ?: $approach->all_heading,
+                    'ias' => $approach->a_ias ?: $approach->all_ias,
+                    'vsi' => $approach->s_vsi ?: $approach->all_vsi,
+                ];
+            });
+
+            foreach ($approachParams as list($param, $stepValue)) {
+                $values = $approachParamValues->map(function ($x) use ($param) {
+                    return ['id' => $x['id'], 'x' => $x[$param]];
+                })->reject(function ($x) use ($param) {
+                    return $x['x'] === null;
+                });
+                $results[$key][$param] = $this->histogram($values, $stepValue);
+            }
+        }
+
+        return Response::json($results);
     }
 
     /**

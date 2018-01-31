@@ -17,52 +17,65 @@
                     <div class="panel-body">
                         {!! Form::open(['method' => 'GET', 'url' => '/approach/go-around', 'class' => 'form-horizontal', 'id' => 'approach_tool']) !!}
                         {!! Form::token() !!}
-                        <div class="col-md-3">
+                        <div class="col-md-3 col-md-offset-2">
                             <div class="form-group">
                                 {!! Form::label('airport_label', 'Airport:') !!}
                                 {!! Form::text('airports', '', ['class' => 'form-control', 'id' => 'airports']) !!}
                             </div>
                         </div>
-                        <div class="col-md-2 col-md-offset-1">
+                        <div class="col-md-3 col-md-offset-2">
                             <div class="form-group">
                                 {!! Form::label('runways_label', 'Runway:') !!}
                                 {!! Form::select('runways', $runways, $selectedRunway, ['placeholder' => 'Select Runway', 'class' => 'form-control', 'id' => 'runways']) !!}
                             </div>
                         </div>
-                        <div class="col-md-12">
-                            <button type="submit" id="display" class="btn btn-primary btn-sm pull-right" data-link="{{ url('/approach/go-around') }}">
-                                Display
-                            </button>
+                        <div class="col-md-2">
+                            <div class="btn-group-vertical" role="group">
+                                <button type="button" id="add_date_range" class="btn btn-default">
+                                    Add Date Range
+                                </button>
+                                <button type="submit" id="display" class="btn btn-primary" data-link="{{ url('/approach/go-around') }}">
+                                    Display
+                                </button>
+                            </div>
                         </div>
 
-                        <div id="date_range_container">
-                            <div class="col-md-2 col-md-offset-1">
-                                <div class="form-group">
-                                    {!! Form::label('start_date_label', 'Start Date:') !!}
-                                    <div class="input-group">
-                                        <input type="text" class="form-control datepicker" name="start_datepicker[]" value="{{ $start_date }}" />
-                                        <span class="input-group-addon">
-                                        <span class="glyphicon glyphicon-calendar"></span>
-                                    </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-2 col-md-offset-1">
-                                <div class="form-group">
-                                    {!! Form::label('end_date_label', 'Start Date:') !!}
-                                    <div class="input-group">
-                                        <input type="text" class="form-control datepicker" name="end_datepicker[]" value="{{ $end_date }}" />
-                                        <span class="input-group-addon">
-                                        <span class="glyphicon glyphicon-calendar"></span>
-                                    </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <div id="date_range_container"></div>
 
                         <br /><br />
 
-                        <div id="chart" class="col-md-12"></div>
+                        <!-- Chart tabs -->
+                        <ul class="nav nav-tabs nav-justified" role="tablist">
+                            <li role="presentation" class="active">
+                                <a href="#chart_crosstrack" aria-controls="crosstrack" role="tab" data-toggle="tab">
+                                    Crosstrack
+                                </a>
+                            </li>
+                            <li role="presentation">
+                                <a href="#chart_heading" aria-controls="heading" role="tab" data-toggle="tab">
+                                    Heading
+                                </a>
+                            </li>
+                            <li role="presentation">
+                                <a href="#chart_ias" aria-controls="indicated airspeed" role="tab" data-toggle="tab">
+                                    Indicated Airspeed
+                                </a>
+                            </li>
+                            <li role="presentation">
+                                <a href="#chart_vsi" aria-controls="vertical speed indicated" role="tab" data-toggle="tab">
+                                    Vertical Speed Indicated
+                                </a>
+                            </li>
+                        </ul>
+
+                        <!-- Tab panes -->
+                        <div class="tab-content">
+                            <div role="tabpanel" class="tab-pane fade in active" id="chart_crosstrack"></div>
+                            <div role="tabpanel" class="tab-pane fade" id="chart_heading"></div>
+                            <div role="tabpanel" class="tab-pane fade" id="chart_ias"></div>
+                            <div role="tabpanel" class="tab-pane fade" id="chart_vsi"></div>
+                        </div>
+
                         {!! Form::close() !!}
                     </div>
                 </div>
@@ -103,27 +116,85 @@
                 }
             });
 
-            $('body').on('focus', '.datepicker', function () {
-                $(this).datepicker({
-                    dateFormat: 'yy-mm-dd'
+            $('#approach_tool').submit(function (e) {
+                e.preventDefault();
+
+                // var $charts = $('div[id^="chart_"]').map(function (idx, chart) {
+                //     return $(chart).highcharts();
+                // });
+                var startDates = $('input[name="start_datepicker[]"]').get().map(function (element) {
+                    return element.value;
                 });
+                var endDates = $('input[name="end_datepicker[]"]').get().map(function (element) {
+                    return element.value;
+                });
+
+                // Remove all existing series from every chart
+                charts.forEach(function (chart) {
+                    chart.showLoading('Loading ...');
+                    while (chart.series.length > 0)
+                        chart.series[0].remove(true);
+                });
+
+                $.ajax({
+                    type: 'GET',
+                    dataType: 'json',
+                    url: '{{ url('/approach/go-around/chart') }}',
+                    data: {startDates: startDates, endDates: endDates},
+                    success: function (data) {
+                        charts.forEach(function (chart) {
+                            Object.keys(data).forEach(function (key) {
+                                chart.addSeries({
+                                    name: key,
+                                    type: 'column',
+                                    data: data[key][chart.param],
+                                    pointPlacement: 'between'
+                                });
+                            });
+
+                            chart.hideLoading();
+                        });
+                    },
+                    error: function (data) {
+                        alert('error');
+                    }
+                });
+
+                return false;
+            });
+
+            var datepickerOptions = {
+                dateFormat: 'yy-mm-dd',
+                changeYear: true,
+                changeMonth: true,
+            };
+
+            $('body').on('focus', '.datepicker', function () {
+                $(this).datepicker(datepickerOptions);
             });
 
             $('#add_date_range').click(function () {
-                $('#date_range_container').append(
-                    createDatePicker('Start Date:', 'start_datepicker[]'),
-                    createDatePicker('End Date:', 'end_datepicker[]')
-                );
-            });
+                var $startDatepicker = createDatePicker('Start Date:', 'start_datepicker[]')
+                    .find('.datepicker').datepicker(datepickerOptions).change(function () {
+                        $endDatepicker.find('.datepicker').datepicker('option', 'minDate', getDate(this));
+                    }).end();
+                var $endDatepicker = createDatePicker('End Date:', 'end_datepicker[]')
+                    .find('.datepicker').datepicker(datepickerOptions).change(function () {
+                        $startDatepicker.find('.datepicker').datepicker('option', 'maxDate', getDate(this));
+                    }).end();
+
+                $('#date_range_container').append($startDatepicker, $endDatepicker);
+            }).click();
 
             function createDatePicker(label, name) {
-                return $('<div>', {class: 'col-md-5 col-md-offset-1'}).append(
+                return $('<div>', {class: 'col-md-3 col-md-offset-2'}).append(
                     $('<div>', {class: 'form-group'}).append(
                         $('<label>', {text: label}),
                         $('<div>', {class: 'input-group'}).append(
                             $('<input>', {type: 'text', class: 'form-control datepicker', name: name}),
-                            $('<span>', {class: 'input-group-addon'}),
-                            $('<span>', {class: 'glyphicon glyphicon-calendar'})
+                            $('<span>', {class: 'input-group-addon'}).append(
+                                $('<span>', {class: 'glyphicon glyphicon-calendar'})
+                            )
                         )
                     )
                 );
@@ -132,7 +203,7 @@
             function getDate(element) {
                 var date;
                 try {
-                    date = $.datepicker.parseDate('yyyy-mm-dd', element.value);
+                    date = $.datepicker.parseDate('yy-mm-dd', element.value);
                 } catch (error) {
                     date = null;
                 }
@@ -140,147 +211,59 @@
                 return date;
             }
 
-            // jQuery UI datepicker
-            // $('#start_datepicker, #end_datepicker').datepicker({
-            //     changeMonth: true,
-            //     changeYear: true,
-            //     showButtonPanel: true,
-            //     dateFormat: 'yy-mm-dd',
-            //     // onClose: function (dateText, inst) {
-            //     //     function isDonePressed() {
-            //     //         return $('#ui-datepicker-div').html().indexOf('ui-datepicker-close ui-state-default ui-priority-primary ui-corner-all ui-state-hover') > -1;
-            //     //     }
-            //     //
-            //     //     if (isDonePressed()) {
-            //     //         var $datepicker_div = $("#ui-datepicker-div");
-            //     //         var year = $datepicker_div.find(".ui-datepicker-year :selected").val();
-            //     //         var month = $datepicker_div.find(".ui-datepicker-month :selected").val();
-            //     //         var day = $datepicker_div.find(".ui-datepicker-day :selected").val();
-            //     //         $(this).datepicker('setDate', new Date(year, month, day)).trigger('change');
-            //     //
-            //     //         $(this).focusout();
-            //     //     }
-            //     // },
-            //     // beforeShow: function (input, inst) {
-            //     //     var datestr = $(this).val();
-            //     //     if (datestr.length > 0) {
-            //     //         var year = parseInt(datestr.substring(0, 4));
-            //     //         var month = parseInt(datestr.substring(5, 7));
-            //     //         var day = parseInt(datestr.substring(8, 10));
-            //     //         $(this).datepicker('option', 'defaultDate', new Date(year, month - 1, day));
-            //     //         $(this).datepicker('setDate', new Date(year, month - 1, day));
-            //     //     }
-            //     // }
-            // });
+            var chartParameters = [
+                {chartName: 'crosstrack', chartTitle: 'Crosstrack', chartUnit: 'ft', chartStep: 5.0},
+                {chartName: 'heading', chartTitle: 'Heading', chartUnit: 'degrees', chartStep: 1.0},
+                {chartName: 'ias', chartTitle: 'Indicated Airspeed', chartUnit: 'kts', chartStep: 5.0},
+                {chartName: 'vsi', chartTitle: 'Vertical Speed Indicated', chartUnit: 'ft/min', chartStep: 50.0},
+            ];
 
-            Highcharts.chart('chart', {
-                chart: {
-                    inverted: true,
-                    type: 'column'
-                },
-                title: {
-                    text: 'Self Defined Glide Path Analysis'
-                },
-                xAxis: {
+            var charts = chartParameters.map(function (param) {
+                var chart = Highcharts.chart('chart_' + param.chartName, {
+                    chart: {
+                        type: 'column',
+                    },
                     title: {
-                        text: 'Glide Path (in degrees)'
+                        text: 'Histogram for ' + param.chartTitle,
                     },
-                    tickInterval: 0.5,
-                    min: 0,
-                    max: 10,
-                    startOnTick: true,
-                    reversed: false,
-                    gridLineWidth: 1
-                },
-                yAxis: {
-                    title: {
-                        text: 'Number of occurrences'
+                    subtitle: {
+                        text: '',
                     },
-                    tickInterval: 1
-                },
-                plotOptions: {
-                    column: {
-                        colorByPoint: false,
-                        tooltip: {
-                            pointFormatter: function () {
-                                return '<b>' + this.x + '\u00B0-' + (this.x + .5) + '\u00B0</b>' +
-                                    '<br /><b>Occurrences: ' + this.y + '</b>';
-                            }
-                        }
+                    xAxis: {
+                        title: {
+                            text: param.chartTitle + ' Error (' + param.chartUnit + ')',
+                        },
+                        crosshair: true,
+                        startOnTick: true,
+                        tickInterval: param.chartStep,
                     },
-                    series: {
-                        cursor: 'pointer',
-                        events: {
-                            click: function (e) {
-                                window.open(
-                                    "{{ url('approach/selfdefined/flights?') }}" +
-                                    $.param({
-                                        runway: $('#runway :selected').html(),
-                                        date: $('#mthYr').val(),
-                                        gpa_low: e.point.x,
-                                        gpa_high: e.point.x + 0.5,
-                                        flight_id: e.point.ids
-                                    }), ''
-                                ).focus();
-                            }
-                        }
-                    }
-//                    scatter: {
-//                        tooltip: {
-//                            pointFormatter: function () {
-//                                return '<b>' + this.info + '</b>' +
-//                                    '<br /><b>Glide Path: ' + this.x + '\u00B0</b>';
-//                            }
-//                        }
-//                    }
-                }
-            });
-
-            $('#sdTool').submit(function (e) {
-                e.preventDefault();
-
-                var chart = $('#chart').highcharts();
-                var mthYr = $('#mthYr').val();
-                var rnwy = $('#runway').val();
-                var CSRF_TOKEN = $('input[name="_token"]').val();
-
-                chart.showLoading('Loading ...');
-
-                while (chart.series.length > 0)
-                    chart.series[0].remove(true);
-
-                $.ajax({
-                    type: 'GET',
-                    dataType: 'json',
-                    url: '{{ url('/approach/selfdefined/chart') }}',
-                    data: {date: mthYr, runway: rnwy, _token: CSRF_TOKEN},
-                    success: function (data) {
-//                        alert('success');
-
-                        chart.addSeries({
-                            name: 'Histogram',
-                            type: 'column',
-                            data: data['data'],
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: 'Number of occurrences',
+                        },
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:10px">{point.key} ' + param.chartUnit + '</span><table>',
+                        pointFormat: '<tr><td style="color:{series.color};padding:2px">{series.name}: </td>' +
+                            '<td style="padding:0"><b>{point.y}</b></td></tr>',
+                        footerFormat: '</table>',
+                        valueSuffix: ' occurrence(s)',
+                        shared: true,
+                        useHTML: true,
+                    },
+                    plotOptions: {
+                        column: {
                             pointPadding: 0,
-                            groupPadding: 0,
-                            pointPlacement: 'between'
-                        });
-
-//                        chart.addSeries({
-//                            name: 'Glide Path',
-//                            type: 'scatter',
-//                            data: data['data'],
-//                            marker: {
-//                                radius: 2,
-//                                fillColor: '#000'
-//                            }
-//                        });
-
-                        chart.hideLoading();
+                            groupPadding: 0.1,
+                            borderWidth: 0,
+                        },
                     },
-                    error: function (data) {
-                    }
                 });
+
+                // Store param name so we can access it later after an AJAX call
+                chart.param = param.chartName;
+                return chart;
             });
         });
     </script>

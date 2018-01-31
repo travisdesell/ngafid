@@ -356,6 +356,11 @@ class FlightID extends Eloquent
         return $this->hasMany('NGAFID\SelfDefinedApproach', 'flight', 'id');
     }
 
+    public function approaches()
+    {
+        return $this->hasMany('NGAFID\Approach', 'flight_id', 'id');
+    }
+
     /*************************************************************************
      * Public Methods
      */
