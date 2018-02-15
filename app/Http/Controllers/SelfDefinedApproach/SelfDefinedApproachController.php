@@ -106,7 +106,7 @@ class SelfDefinedApproachController extends Controller {
         }
 
         usort($arr, function ($a, $b) {
-            return $a['x'] - $b['x'];
+            return $a['x'] === $b['x'] ? 0 : ($a['x'] < $b['x'] ? -1 : 1);
         });
 
         return $arr;
