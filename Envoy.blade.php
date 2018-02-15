@@ -10,7 +10,7 @@
     * To run this Envoy file, execute:
     *   envoy run deploy
 -->
-@servers(['prod' => 'fdm-server'])
+@servers(['prod' => 'deploy-fdm-server'])
 
 @setup
     $composer_home = '/var/www/html';
