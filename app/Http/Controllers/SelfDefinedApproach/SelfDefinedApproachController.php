@@ -57,25 +57,30 @@ class SelfDefinedApproachController extends Controller {
 
         $fleetID = Auth::user()->org_id;
         $runway = $request->get('runway');
-        $date = explode('-', $request->get('date', date('Y') . '-' . date('m')));
+        $date = explode(
+            '-',
+            $request->get('date', date('Y') . '-' . date('m'))
+        );
         $year = $date[0];
         $month = $date[1];
 
-        $approaches = SelfDefinedApproach::select('flight', 'actualGPA', 'rsquared')
-            ->whereRaw("MONTH(fltDate) = {$month}")
+        $approaches = SelfDefinedApproach::select(
+            'flight',
+            'actualGPA',
+            'rsquared'
+        )->whereRaw("MONTH(fltDate) = {$month}")
             ->whereRaw("YEAR(fltDate) = {$year}")
             ->where('fleet_id', $fleetID)
             ->where('airport_id', $runway)
             ->get();
 
-        $series = null;
-        foreach ($approaches as $approach) {
-            $series[] = [
-                'x' => (float)$approach->actualGPA,
+        $series = $approaches->map(function ($approach) {
+            return [
+                'x' => $approach->actualGPA,
                 'y' => 0,
                 'id' => $approach->flight,
             ];
-        }
+        });
 
         $series = $this->histogram($series, 0.5);
 
@@ -94,7 +99,7 @@ class SelfDefinedApproachController extends Controller {
 
         foreach ($data as $datum) {
             $x = floor($datum['x'] / $step) * $step;
-            if (!array_key_exists("$x", $histo)) {
+            if ( !array_key_exists("$x", $histo)) {
                 $histo["$x"] = ['count' => 0, 'flights' => []];
             }
             $histo["$x"]['count']++;
@@ -102,7 +107,11 @@ class SelfDefinedApproachController extends Controller {
         }
 
         foreach ($histo as $k => $v) {
-            $arr[] = ['x' => floatval($k), 'y' => $v['count'], 'ids' => $v['flights']];
+            $arr[] = [
+                'x' => floatval($k),
+                'y' => $v['count'],
+                'ids' => $v['flights'],
+            ];
         }
 
         usort($arr, function ($a, $b) {
