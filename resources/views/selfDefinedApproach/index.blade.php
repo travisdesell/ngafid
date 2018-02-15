@@ -16,7 +16,7 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <b>Self Defined Approach Analysis</b>
-                        <span class="pull-right">{{date("D M d, Y G:i A T")}}</span>
+                        <span class="pull-right">{{ date("D M d, Y G:i A T") }}</span>
                     </div>
 
                     <div class="panel-body">
@@ -157,7 +157,7 @@
                         colorByPoint: false,
                         tooltip: {
                             pointFormatter: function () {
-                                return '<b>' + this.x + '\u00B0-' + (this.x + .5) + '\u00B0</b>' +
+                                return '<b>' + this.x + '\u00B0-' + (this.x + 0.5) + '\u00B0</b>' +
                                     '<br /><b>Occurrences: ' + this.y + '</b>';
                             }
                         }
@@ -174,19 +174,12 @@
                                         gpa_low: e.point.x,
                                         gpa_high: e.point.x + 0.5,
                                         flight_id: e.point.ids
-                                    }), ''
+                                    }),
+                                    ''
                                 ).focus();
                             }
                         }
                     }
-//                    scatter: {
-//                        tooltip: {
-//                            pointFormatter: function () {
-//                                return '<b>' + this.info + '</b>' +
-//                                    '<br /><b>Glide Path: ' + this.x + '\u00B0</b>';
-//                            }
-//                        }
-//                    }
                 }
             });
 
@@ -209,8 +202,6 @@
                     url: '{{ url('/approach/selfdefined/chart') }}',
                     data: {date: mthYr, runway: rnwy, _token: CSRF_TOKEN},
                     success: function (data) {
-//                        alert('success');
-
                         chart.addSeries({
                             name: 'Histogram',
                             type: 'column',
@@ -219,16 +210,6 @@
                             groupPadding: 0,
                             pointPlacement: 'between'
                         });
-
-//                        chart.addSeries({
-//                            name: 'Glide Path',
-//                            type: 'scatter',
-//                            data: data['data'],
-//                            marker: {
-//                                radius: 2,
-//                                fillColor: '#000'
-//                            }
-//                        });
 
                         chart.hideLoading();
                     },
