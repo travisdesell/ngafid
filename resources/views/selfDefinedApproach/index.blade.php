@@ -65,10 +65,10 @@
 @section('jsScripts')
     <script src="//code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
 
-    <script src="http://code.highcharts.com/4.2.2/highcharts.js"></script>
-    <script src="http://code.highcharts.com/4.2.2/modules/drilldown.js"></script>
-    <script src="http://code.highcharts.com/4.2.2/modules/no-data-to-display.js"></script>
-    <script src="http://code.highcharts.com/4.2.2/modules/exporting.js"></script>
+    <script src="http://code.highcharts.com/6.0.6/highcharts.js"></script>
+    <script src="http://code.highcharts.com/6.0.6/modules/drilldown.js"></script>
+    <script src="http://code.highcharts.com/6.0.6/modules/no-data-to-display.js"></script>
+    <script src="http://code.highcharts.com/6.0.6/modules/exporting.js"></script>
 
     <script type="text/javascript">
         $(function () {
