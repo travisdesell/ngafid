@@ -103,18 +103,19 @@
     </ul>
 </li>
 
-@if ($fleet->isUND())
-    <li class="dropdown">
-        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-            Approach Analysis <span class="caret"></span>
-        </a>
-        <ul class="dropdown-menu" role="menu">
+
+<li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+        Approach Analysis <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu" role="menu">
+        @if ($fleet->isUND())
             <li>
                 <a href="{{ url('approach/analysis') }}">Stabilized Approach</a>
             </li>
-            {{--<li>--}}
-                {{--<a href="{{ url('approach/selfdefined') }}">Self Defined</a>--}}
-            {{--</li>--}}
-        </ul>
-    </li>
-@endif
+        @endif
+        <li>
+            <a href="{{ url('approach/selfdefined') }}">Self Defined</a>
+        </li>
+    </ul>
+</li>
