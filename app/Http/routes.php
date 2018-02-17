@@ -60,6 +60,9 @@ Route::get('approach/selfdefined/', 'SelfDefinedApproach\SelfDefinedApproachCont
 Route::get('approach/selfdefined/chart', 'SelfDefinedApproach\SelfDefinedApproachController@chart');
 Route::get('approach/selfdefined/flights', 'SelfDefinedApproach\SelfDefinedApproachController@flights');
 
+Route::get('approach/turn-to-final/{flightId}', 'TurnToFinalController@index');
+Route::get('approach/turn-to-final/chart', 'TurnToFinalController@chart');
+
 Route::get('dbx', 'DropboxAuthController@index');
 Route::post('dbx', 'DropboxAuthController@store');
 
