@@ -20,35 +20,46 @@ class TurnToFinalController extends Controller
      *
      * @return Response
      */
-    public function index(FlightID $flightId, Request $request)
+    public function index($flightId)
     {
-        // $flightId = $request->get('flight_id');
-        $approach = $flightId->approaches()->first();
-        $data = $flightId->mainTableData()
-            ->select(['longitude', 'latitude'])
-            ->offset($approach->approach_start)
-            ->take($approach->landing_end - $approach->approach_start + 1)
-            ->get()
-            ->map(
-                function ($point) {
-                    return [$point->longitude, $point->latitude];
-                }
-            );
-        $runway = $approach->runway;
+        $flightId = FlightID::with('approaches')
+            ->findOrFail($flightId);
 
-        return view(
-            'turn_to_final/index',
-            [
-                'flightId' => $flightId->id,
-                'approach' => $approach,
+        $allData = $flightId->approaches->map(function ($approach) use ($flightId) {
+            $data = $flightId->mainTableData()
+                ->select(['longitude', 'latitude'])
+                ->offset($approach->approach_start)
+                ->take($approach->landing_end - $approach->approach_start + 1)
+                ->get()
+                ->map(function ($point) {
+                    return [$point->longitude, $point->latitude];
+                });
+
+            $approachData = $data->slice(
+                0, $approach->approach_end - $approach->approach_start + 1
+            );
+            $landingData = $data->slice(
+                $approach->approach_end - $approach->approach_start + 1,
+                $approach->landing_end - $approach->landing_start + 1
+            );
+            $runway = $approach->runway;
+
+            return [
+                'approach' => $approachData,
+                'landing' => $landingData,
+                'takeoff' => [],
                 'runway' => $runway,
-                'touchdown' => [$runway->touchdown_lon, $runway->touchdown_lat],
-                'coordinates' => $data,
-            ]
-        );
+            ];
+        });
+
+        return view('turn_to_final/index', [
+            'flightId' => $flightId->id,
+            'approaches' => $flightId->approaches,
+            'data' => $allData,
+        ]);
     }
 
-    public function chart()
+    public function chart(Request $request)
     {
     }
 }

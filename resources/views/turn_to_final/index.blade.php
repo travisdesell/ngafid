@@ -2,6 +2,21 @@
 
 @section('cssScripts')
     <link href="https://openlayers.org/en/v4.6.4/css/ol.css" rel="stylesheet">
+    <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+
+    <style>
+        #map-container {
+            margin-top: 2em;
+        }
+
+        .selected-source {
+            color: #ffffff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.20);
+            background-image: linear-gradient(-180deg, #80d1f3 0%, #4a90e2 100%);
+            box-shadow: 0 1px 2px 0 rgba(74, 144, 226, 0.44), 0 2px 8px 0 rgba(0, 0, 0, 0.14);
+        }
+    </style>
 @endsection
 
 @section('content')
@@ -10,7 +25,7 @@
             <div class="col-md-10 col-md-offset-1">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <b>Turn To Final Analysis - {{ $flightId }} - {{ $approach->approach_id }}</b>
+                        <b>Turn To Final Analysis - {{ $flightId }}</b>
                         <span class="pull-right">{{ date('D M d, Y G:i A T') }}</span>
                     </div>
 
@@ -27,7 +42,26 @@
                             </button>
                         </div>
 
-                        <div id="map" class="map col-md-12"></div>
+                        <div id="map-container" class="col-md-12">
+                            <div class="btn-group btn-group-justified" role="group">
+                                @for ($i = 0; $i < $data->count(); $i++)
+                                    <div class="btn-group" role="group">
+                                        <button type="button" id="set-source-{{ $i }}" class="btn btn-default">
+                                            Approach #{{ $i + 1 }}
+                                        </button>
+                                    </div>
+                                @endfor
+                            </div>
+
+                            <div id="map" class="map"></div>
+
+                            <div class="btn-group btn-group-justified" role="group">
+                                <a href="" id="export" class="btn btn-default">
+                                    <span class="glyphicon glyphicon-download-alt"></span>
+                                    Download PNG
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -38,6 +72,7 @@
 @section('jsScripts')
     <script src="https://openlayers.org/en/v4.6.4/build/ol.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/5.1.5/turf.min.js" integrity="sha256-V9GWip6STrPGZ47Fl52caWO8LhKidMGdFvZbjFUlRFs=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.3/FileSaver.min.js" integrity="sha256-FPJJt8nA+xL4RU6/gsriA8p8xAeLGatoyTjldvQKGdE=" crossorigin="anonymous"></script>
 
     <script type="text/javascript">
         function transformPoint(point) {
@@ -50,41 +85,129 @@
         }
 
         $(function () {
-            var coordinates = transformPoints({!! json_encode($coordinates) !!});
-            var touchdown = {!! json_encode($touchdown) !!};
-            var runwayBearing = {!! $runway->true_course !!};
+            var data = {!! json_encode($data) !!};
+            var $setSourceBtns = $('button[id^="set-source-"]');
 
-            // We need the reciprocal of the runway heading for calculating
-            // the extended center line point
-            var reverseBearing = (180 + runwayBearing) % 360;
+            $setSourceBtns.click(function () {
+                var idx = $setSourceBtns.index(this);
+                $setSourceBtns.removeClass('selected-source');
+                $(this).addClass('selected-source');
 
-            // Need to normalize bearing from -180 to 180 degrees from north
-            if (reverseBearing > 180)
-                reverseBearing -= 360;
+                console.log('Approach: ' + idx);
+                setVectorSource(idx);
+            });
 
-            // Calculate a point that is 1 mile in the opposite heading as the
-            // runway for an extended center line
-            var touchdownPoint = turf.point(touchdown);
-            var extendedTouchdownPoint = turf.destination(
-                touchdownPoint, 1, reverseBearing, {units: 'miles'}
-            );
-            var extendedCenterLineString = turf.lineString(
-                transformPoints([extendedTouchdownPoint, touchdownPoint]),
-                {id: 'extended_center_line'}
-            );
+            var vectorSources = data.map(function (approach) {
+                return createVectorSource(approach);
+            });
 
-            var flightPath = turf.lineString(coordinates, {id: 'flight_path'});
+            function createVectorSource(approach) {
+                var approachCoordinates = transformPoints(approach.approach);
+                var landingCoordinates = transformPoints(approach.landing);
+                var touchdown = [
+                    approach.runway.touchdown_lon,
+                    approach.runway.touchdown_lat
+                ];
+                var runwayBearing = approach.runway.true_course;
 
-            // Combine extended center line & flight path into a single feature
-            // collection
-            var collection = turf.featureCollection([
-                flightPath, extendedCenterLineString
-            ]);
+                // We need the reciprocal of the runway heading for calculating
+                // the extended center line point
+                var reverseBearing = (180 + runwayBearing) % 360;
+
+                // Need to normalize bearing from -180 to 180 degrees from north
+                if (reverseBearing > 180)
+                    reverseBearing -= 360;
+
+                // Calculate a point that is 1 mile in the opposite heading as the
+                // runway for an extended center line
+                var touchdownPoint = turf.point(touchdown);
+                var extendedTouchdownPoint = turf.destination(
+                    touchdownPoint, 1, reverseBearing, {units: 'miles'}
+                );
+                var extendedCenterLineString = turf.lineString(
+                    transformPoints([extendedTouchdownPoint, touchdownPoint]),
+                    {id: 'extended_center_line'}
+                );
+
+                var approachPath = turf.lineString(approachCoordinates, {id: 'approach'});
+                var landingPath = turf.lineString(landingCoordinates, {id: 'landing'});
+
+                // Combine extended center line & flight path into a single feature
+                // collection
+                var collection = turf.featureCollection([
+                    approachPath, landingPath, extendedCenterLineString
+                ]);
+
+                var vectorSource = new ol.source.Vector({
+                    features: (new ol.format.GeoJSON()).readFeatures(collection)
+                });
+
+                return vectorSource;
+            }
+
+            function setVectorSource(idx) {
+                vectorLayer.setSource(vectorSources[idx]);
+
+                var approach = data[idx];
+                var touchdownPoint = turf.point([
+                    approach.runway.touchdown_lon,
+                    approach.runway.touchdown_lat
+                ]);
+
+                var rotation = turf.degreesToRadians(360 - approach.runway.true_course);
+
+                flyTo(
+                    transformPoint(touchdownPoint),
+                    turf.degreesToRadians(360 - approach.runway.true_course),
+                    3000,  // milliseconds
+                    function () {}
+                );
+            }
+
+            function flyTo(location, rotation, duration, done) {
+                var zoom = mapView.getZoom();
+                var parts = 2;
+                var called = false;
+                var callback = function (complete) {
+                    --parts;
+                    if (called) {
+                        return;
+                    }
+                    if (parts === 0 || !complete) {
+                        called = true;
+                        done(complete);
+                    }
+                };
+                mapView.animate({
+                    center: location,
+                    rotation: rotation,
+                    duration: duration
+                }, callback);
+                mapView.animate({
+                    zoom: zoom - 3,
+                    duration: duration / 2
+                }, {
+                    zoom: 15,
+                    duration: duration / 2
+                }, callback);
+            }
 
             var styles = {
-                'flight_path': new ol.style.Style({
+                'approach': new ol.style.Style({
                     stroke: new ol.style.Stroke({
                         color: '#00B7B7',
+                        width: 2
+                    })
+                }),
+                'landing': new ol.style.Style({
+                    stroke: new ol.style.Stroke({
+                        color: '#3A65C9',
+                        width: 2
+                    })
+                }),
+                'takeoff': new ol.style.Style({
+                    stroke: new ol.style.Stroke({
+                        color: '#082A79',
                         width: 2
                     })
                 }),
@@ -100,25 +223,47 @@
                 return styles[feature.getProperties().id];
             };
 
-            var vectorSource = new ol.source.Vector({
-                features: (new ol.format.GeoJSON()).readFeatures(collection)
-            });
             var vectorLayer = new ol.layer.Vector({
-                source: vectorSource,
                 style: styleFunction
+            });
+
+            var mapView = new ol.View({
+                // Setting the below as defaults before the data is dynamically
+                // loaded
+                center: [0, 0],
+                zoom: 2
             });
 
             var map = new ol.Map({
                 layers: [
-                    new ol.layer.Tile({source: new ol.source.OSM()}),
+                    new ol.layer.Tile({
+                        preload: 4,
+                        source: new ol.source.OSM()
+                    }),
                     vectorLayer
                 ],
                 target: 'map',
-                view: new ol.View({
-                    center: transformPoint(touchdownPoint),
-                    zoom: 15,
-                    rotation: turf.degreesToRadians(360 - runwayBearing)
-                })
+                loadTilesWhileAnimating: true,
+                view: mapView
+            });
+
+            // Set the first approach as the map source by default
+            $setSourceBtns.first().click();
+
+            $('#export').click(function () {
+                map.once('postcompose', function (event) {
+                    var canvas = event.context.canvas;
+                    if (navigator.msSaveBlob) {
+                        navigator.msSaveBlob(canvas.msToBlob(), 'map.png');
+                    } else {
+                        canvas.toBlob(function(blob) {
+                            saveAs(blob, 'map.png');
+                        });
+                    }
+                });
+                map.renderSync();
+
+                return false;
             });
 
             $('#display').click(function () {
