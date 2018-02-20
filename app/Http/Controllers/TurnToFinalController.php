@@ -20,7 +20,16 @@ class TurnToFinalController extends Controller
      *
      * @return Response
      */
-    public function index($flightId)
+    public function index($flightId = null)
+    {
+        return view('turn_to_final/index', [
+            'flightId' => $flightId,
+            // 'approaches' => $flightId->approaches,
+            // 'data' => $allData,
+        ]);
+    }
+
+    public function chart($flightId, Request $request)
     {
         $flightId = FlightID::with('approaches')
             ->findOrFail($flightId);
@@ -52,14 +61,6 @@ class TurnToFinalController extends Controller
             ];
         });
 
-        return view('turn_to_final/index', [
-            'flightId' => $flightId->id,
-            'approaches' => $flightId->approaches,
-            'data' => $allData,
-        ]);
-    }
-
-    public function chart(Request $request)
-    {
+        return response()->json($allData);
     }
 }

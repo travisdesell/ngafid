@@ -24,7 +24,9 @@ class RouteServiceProvider extends ServiceProvider {
 	{
 		parent::boot($router);
 
-		$router->model('flightId', 'NGAFID\FlightID');
+		$router->model('flight', 'NGAFID\FlightID');
+
+		$router->pattern('id', '^[1-9][0-9]*$');
 	}
 
 	/**

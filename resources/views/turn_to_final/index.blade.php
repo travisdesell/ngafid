@@ -25,33 +25,25 @@
             <div class="col-md-10 col-md-offset-1">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <b>Turn To Final Analysis - {{ $flightId }}</b>
+                        <b>Turn To Final Analysis</b>
                         <span class="pull-right">{{ date('D M d, Y G:i A T') }}</span>
                     </div>
 
                     <div class="panel-body">
                         <div class="col-md-3">
                             <div class="form-group">
-                                {!! Form::label('flight_id', 'Flight ID:') !!}
-                                {!! form::text('flight_id', $flightId, ['class' => 'form-control', 'id' => 'flight_id']) !!}
+                                {!! Form::label('flight-id', 'Flight ID:') !!}
+                                {!! form::text('flight-id', $flightId, ['class' => 'form-control', 'id' => 'flight-id']) !!}
                             </div>
                         </div>
-                        <div class="col-md-12">
-                            <button type="button" id="display" class="btn btn-primary btn-sm pull-right">
+                        <div class="col-md-9">
+                            <button type="button" id="display" class="btn btn-primary">
                                 Display
                             </button>
                         </div>
 
                         <div id="map-container" class="col-md-12">
-                            <div class="btn-group btn-group-justified" role="group">
-                                @for ($i = 0; $i < $data->count(); $i++)
-                                    <div class="btn-group" role="group">
-                                        <button type="button" id="set-source-{{ $i }}" class="btn btn-default">
-                                            Approach #{{ $i + 1 }}
-                                        </button>
-                                    </div>
-                                @endfor
-                            </div>
+                            <div id="set-source-btns" class="btn-group btn-group-justified" role="group"></div>
 
                             <div id="map" class="map"></div>
 
@@ -85,21 +77,15 @@
         }
 
         $(function () {
-            var data = {!! json_encode($data) !!};
-            var $setSourceBtns = $('button[id^="set-source-"]');
+            var allData = [];
+            var $setSourceBtnsContainer = $('div#set-source-btns');
+            var vectorSources = [];
 
-            $setSourceBtns.click(function () {
-                var idx = $setSourceBtns.index(this);
-                $setSourceBtns.removeClass('selected-source');
-                $(this).addClass('selected-source');
-
-                console.log('Approach: ' + idx);
-                setVectorSource(idx);
-            });
-
-            var vectorSources = data.map(function (approach) {
-                return createVectorSource(approach);
-            });
+            function createSetSourceBtn(idx) {
+                return $('<div>', {class: 'btn-group', role: 'group'}).append(
+                    $('<button>', {id: 'set-source-' + idx, class: 'btn btn-default', text: 'Approach #' + (idx + 1)})
+                );
+            }
 
             function createVectorSource(approach) {
                 var approachCoordinates = transformPoints(approach.approach);
@@ -148,13 +134,11 @@
             function setVectorSource(idx) {
                 vectorLayer.setSource(vectorSources[idx]);
 
-                var approach = data[idx];
+                var approach = allData[idx];
                 var touchdownPoint = turf.point([
                     approach.runway.touchdown_lon,
                     approach.runway.touchdown_lat
                 ]);
-
-                var rotation = turf.degreesToRadians(360 - approach.runway.true_course);
 
                 flyTo(
                     transformPoint(touchdownPoint),
@@ -247,8 +231,13 @@
                 view: mapView
             });
 
-            // Set the first approach as the map source by default
-            $setSourceBtns.first().click();
+            $setSourceBtnsContainer.on('click', 'button[id^="set-source-"]', function () {
+                var $sourceBtns = $setSourceBtnsContainer.find('button[id^="set-source-"]');
+                var idx = $sourceBtns.index(this);
+                $sourceBtns.removeClass('selected-source');
+                $(this).addClass('selected-source');
+                setVectorSource(idx);
+            });
 
             $('#export').click(function () {
                 map.once('postcompose', function (event) {
@@ -267,8 +256,36 @@
             });
 
             $('#display').click(function () {
-                alert($('#flight_id').val());
-            });
+                var flightId = $('#flight-id').val();
+
+                if (! /^[1-9][0-9]*$/.test(flightId))
+                    // Check to see if the user submitted ID is valid.
+                    return;
+
+                $.ajax({
+                    type: 'GET',
+                    dataType: 'json',
+                    url: '{{ url('approach/turn-to-final/chart') }}/' + flightId
+                }).done(function (data, textStatus, jqXHR) {
+                    allData = data;
+
+                    // Reset our array of vector sources
+                    vectorSources = allData.map(function (approach) {
+                        return createVectorSource(approach);
+                    });
+
+                    $setSourceBtnsContainer.empty()
+                        .append(data.map(function (approach, idx) {
+                            return createSetSourceBtn(idx);
+                        }));
+
+                    // Set the first approach as the map source by default
+                    $setSourceBtnsContainer.find('button[id^="set-source-"]')
+                        .first().click();
+                }).fail(function (jqXHR, textStatus, errorThrown) {
+                    console.error(errorThrown);
+                });
+            }).click();  // Simulate a click on page-load to submit right away
         });
     </script>
 @endsection
