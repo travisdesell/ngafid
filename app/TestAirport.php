@@ -13,4 +13,9 @@ class TestAirport extends Eloquent
     {
         return $this->hasMany('NGAFID\TestRunway', 'airport_id', 'id');
     }
+
+    public function approaches()
+    {
+        return $this->hasMany('NGAFID\Approach', 'airport_id', 'id');
+    }
 }

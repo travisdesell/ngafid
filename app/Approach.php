@@ -37,10 +37,14 @@ class Approach extends Eloquent
         return $this->belongsTo('NGAFID\FlightID', 'flight_id', 'id');
     }
 
+    public function airport()
+    {
+        return $this->belongsto('NGAFID\TestAirport', 'airport_id', 'id');
+    }
+
     public function runway()
     {
-        return $this->belongsTo('NGAFID\TestRunway', 'airport_id', 'airport_id')
-            ->where('id', $this->runway_id);
+        return $this->belongsTo('NGAFID\TestRunway', 'runway_id', 'id');
     }
 
     public function isHeadingUnstable()
