@@ -48,7 +48,7 @@ class TurnToFinalController extends Controller
                 0, $approach->approach_end - $approach->approach_start + 1
             );
             $landingData = $data->slice(
-                $approach->approach_end - $approach->approach_start + 1,
+                $approach->approach_end - $approach->approach_start,
                 $approach->landing_end - $approach->landing_start + 1
             );
             $runway = $approach->runway;
