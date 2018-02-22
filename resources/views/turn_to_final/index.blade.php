@@ -1,11 +1,20 @@
 @extends('NGAFID-master')
 
 @section('cssScripts')
+    <link href="//code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css" rel="stylesheet" />
     <link href="https://openlayers.org/en/v4.6.4/css/ol.css" rel="stylesheet">
     <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
     <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
 
     <style>
+        .ui-datepicker-calendar {
+            display: none;
+        }
+
+        .vertical-line {
+            border-left: 1px solid hsl(214, 7%, 80%);
+        }
+
         #map-container {
             margin-top: 2em;
         }
@@ -31,19 +40,52 @@
 
                     <div class="panel-body">
                         <div class="col-md-3">
-                            <div class="form-group">
-                                {!! Form::label('flight-id', 'Flight ID:') !!}
-                                {!! form::text('flight-id', $flightId, ['class' => 'form-control', 'id' => 'flight-id']) !!}
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    {!! Form::label('flight_id', 'Flight ID:') !!}
+                                    {!! form::text('flight_id', $flightId, ['class' => 'form-control', 'id' => 'flight_id']) !!}
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <button type="button" id="display_single" class="btn btn-primary">
+                                    Display Single Flight
+                                </button>
                             </div>
                         </div>
-                        <div class="col-md-9">
-                            <button type="button" id="display" class="btn btn-primary">
-                                Display
-                            </button>
+
+                        <div class="col-md-9 vertical-line">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    {!! Form::label('airport', 'Airport:') !!}
+                                    {!! Form::text('airport', '', ['class' => 'form-control', 'id' => 'airport']) !!}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    {!! Form::label('runway', 'Runway:') !!}
+                                    {!! Form::select('runway', $airports, null, ['placeholder' => 'Select Runway', 'class' => 'form-control', 'id' => 'runway']) !!}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    {!! Form::label('month_year', 'Month/Year:') !!}
+                                    <div class="input-group">
+                                        <input class="form-control" id="month_year" type="text" name="month_year" value="{{ $date }}" />
+                                        <span class="input-group-addon">
+                                            <span class="glyphicon glyphicon-calendar"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <button type="button" id="display_agg" class="btn btn-primary">
+                                    Display Aggregate
+                                </button>
+                            </div>
                         </div>
 
                         <div id="map-container" class="col-md-12">
-                            <div id="set-source-btns" class="btn-group btn-group-justified" role="group"></div>
+                            <div id="set_source_btns" class="btn-group btn-group-justified" role="group"></div>
 
                             <div id="map" class="map"></div>
 
@@ -62,9 +104,14 @@
 @endsection
 
 @section('jsScripts')
+    <script src="//code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
+
     <script src="https://openlayers.org/en/v4.6.4/build/ol.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/5.1.5/turf.min.js" integrity="sha256-V9GWip6STrPGZ47Fl52caWO8LhKidMGdFvZbjFUlRFs=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.3/FileSaver.min.js" integrity="sha256-FPJJt8nA+xL4RU6/gsriA8p8xAeLGatoyTjldvQKGdE=" crossorigin="anonymous"></script>
+
+    <script src="{{ elixir('js/airport-runway-autocomplete.js') }}"></script>
+    <script src="{{ elixir('js/datepicker-utils.js') }}"></script>
 
     <script type="text/javascript">
         function transformPoint(point) {
@@ -78,7 +125,7 @@
 
         $(function () {
             var allData = [];
-            var $setSourceBtnsContainer = $('div#set-source-btns');
+            var $setSourceBtnsContainer = $('div#set_source_btns');
             var vectorSources = [];
 
             function createSetSourceBtn(idx) {
@@ -255,8 +302,8 @@
                 return false;
             });
 
-            $('#display').click(function () {
-                var flightId = $('#flight-id').val();
+            $('#display_single').click(function () {
+                var flightId = $('#flight_id').val();
 
                 if (! /^[1-9][0-9]*$/.test(flightId))
                     // Check to see if the user submitted ID is valid.
@@ -285,7 +332,21 @@
                 }).fail(function (jqXHR, textStatus, errorThrown) {
                     console.error(errorThrown);
                 });
-            }).click();  // Simulate a click on page-load to submit right away
+            });
+
+            $('#display_agg').click(function () {
+                var date = $('#month_year').val();
+                var runwayId = $('#runway').val();
+
+                console.log(date, runwayId);
+
+                // $.ajax({
+                //     type: 'GET',
+                //     dataType: 'json',
+                //     url: '{{ url('approach/turn-to-final-chart') }}/' + runwayId + '/' + date,
+                //     data: {date: date, runwayId: runwayId}
+                // });
+            });
         });
     </script>
 @endsection
