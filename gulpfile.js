@@ -39,6 +39,12 @@ elixir(function(mix) {
         .scripts([
             "./node_modules/jquery/dist/jquery.min.js"
         ], "public/js/jquery.min.js")
+        .scripts("airport-runway-autocomplete.js")
+        .scripts([
+            "datepicker-common.js",
+            "day-month-year-datepicker.js",
+            "month-year-datepicker.js"
+        ], "public/js/datepicker-utils.js")
         .version([
             "images",
             "css",
