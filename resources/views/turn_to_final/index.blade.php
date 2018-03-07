@@ -130,13 +130,34 @@
 
             function createSetSourceBtn(idx) {
                 return $('<div>', {class: 'btn-group', role: 'group'}).append(
-                    $('<button>', {id: 'set-source-' + idx, class: 'btn btn-default', text: 'Approach #' + (idx + 1)})
+                    $('<button>', {id: 'set_source_' + idx, class: 'btn btn-default', text: 'Approach #' + (idx + 1)})
                 );
             }
 
+            function createVectorLayer(source) {
+                return new ol.layer.Vector({
+                    source: source,
+                    style: styleFunction
+                });
+            }
+
             function createVectorSource(approach) {
-                var approachCoordinates = transformPoints(approach.approach);
-                var landingCoordinates = transformPoints(approach.landing);
+                var phases = approach.phases;
+                var features = [];
+                Object.keys(phases).forEach(function (key) {
+                    var coordinates = transformPoints(phases[key].coordinates);
+
+                    if (coordinates.length > 1) {
+                        features.push(turf.lineString(
+                            coordinates, {
+                                id: key,
+                                type: phases[key].type,
+                                severity: phases[key].severity
+                            }
+                        ));
+                    }
+                });
+
                 var touchdown = [
                     approach.runway.touchdown_lon,
                     approach.runway.touchdown_lat
@@ -162,34 +183,29 @@
                     {id: 'extended_center_line'}
                 );
 
-                var approachPath = turf.lineString(approachCoordinates, {id: 'approach'});
-                var landingPath = turf.lineString(landingCoordinates, {id: 'landing'});
-
                 // Combine extended center line & flight path into a single feature
                 // collection
                 var collection = turf.featureCollection([
-                    approachPath, landingPath, extendedCenterLineString
+                    ...features, extendedCenterLineString
                 ]);
 
-                var vectorSource = new ol.source.Vector({
+                return new ol.source.Vector({
                     features: (new ol.format.GeoJSON()).readFeatures(collection)
                 });
-
-                return vectorSource;
             }
 
             function setVectorSource(idx) {
                 vectorLayer.setSource(vectorSources[idx]);
 
-                var approach = allData[idx];
+                var runway = allData[idx].runway;
                 var touchdownPoint = turf.point([
-                    approach.runway.touchdown_lon,
-                    approach.runway.touchdown_lat
+                    runway.touchdown_lon,
+                    runway.touchdown_lat
                 ]);
 
                 flyTo(
                     transformPoint(touchdownPoint),
-                    turf.degreesToRadians(360 - approach.runway.true_course),
+                    turf.degreesToRadians(360 - runway.true_course),
                     3000,  // milliseconds
                     function () {}
                 );
@@ -224,34 +240,70 @@
             }
 
             var styles = {
-                'approach': new ol.style.Style({
+                'stop-and-go': new ol.style.Style({
                     stroke: new ol.style.Stroke({
-                        color: '#00B7B7',
+                        color: '#529699',
+                        width: 2
+                    })
+                }),
+                'touch-and-go': new ol.style.Style({
+                    stroke: new ol.style.Stroke({
+                        color: '#004144',
+                        width: 2
+                    })
+                }),
+                'go-around': new ol.style.Style({
+                    stroke: new ol.style.Stroke({
+                        color: '#005906',
+                        width: 2
+                    })
+                }),
+                'aligned': new ol.style.Style({
+                    stroke: new ol.style.Stroke({
+                        color: '#6ac870',
+                        width: 2
+                    })
+                }),
+                'large': new ol.style.Style({
+                    stroke: new ol.style.Stroke({
+                        color: '#be2f2b',
+                        width: 2
+                    })
+                }),
+                'small': new ol.style.Style({
+                    stroke: new ol.style.Stroke({
+                        color: '#be6f2b',
                         width: 2
                     })
                 }),
                 'landing': new ol.style.Style({
                     stroke: new ol.style.Stroke({
-                        color: '#3A65C9',
+                        color: '#fe8b88',
                         width: 2
                     })
                 }),
                 'takeoff': new ol.style.Style({
                     stroke: new ol.style.Stroke({
-                        color: '#082A79',
+                        color: '#710300',
                         width: 2
                     })
                 }),
                 'extended_center_line': new ol.style.Style({
                     stroke: new ol.style.Stroke({
-                        color: '#AC0000',
+                        color: '#000000',
                         width: 1
                     })
                 })
             };
 
             var styleFunction = function (feature) {
-                return styles[feature.getProperties().id];
+                var props = feature.getProperties();
+                if (props.id === 'turn') {
+                    if (props.type === 'aligned') return styles[props.type];
+                    else return styles[props.severity];
+                }
+
+                return styles[props.type || props.id];
             };
 
             var vectorLayer = new ol.layer.Vector({
@@ -265,12 +317,14 @@
                 zoom: 2
             });
 
+            var osmSourceLayer = new ol.layer.Tile({
+                preload: 4,
+                source: new ol.source.OSM()
+            });
+
             var map = new ol.Map({
                 layers: [
-                    new ol.layer.Tile({
-                        preload: 4,
-                        source: new ol.source.OSM()
-                    }),
+                    osmSourceLayer,
                     vectorLayer
                 ],
                 target: 'map',
@@ -278,8 +332,8 @@
                 view: mapView
             });
 
-            $setSourceBtnsContainer.on('click', 'button[id^="set-source-"]', function () {
-                var $sourceBtns = $setSourceBtnsContainer.find('button[id^="set-source-"]');
+            $setSourceBtnsContainer.on('click', 'button[id^="set_source_"]', function () {
+                var $sourceBtns = $setSourceBtnsContainer.find('button[id^="set_source_"]');
                 var idx = $sourceBtns.index(this);
                 $sourceBtns.removeClass('selected-source');
                 $(this).addClass('selected-source');
@@ -309,12 +363,16 @@
                     // Check to see if the user submitted ID is valid.
                     return;
 
-                $.ajax({
-                    type: 'GET',
-                    dataType: 'json',
-                    url: '{{ url('approach/turn-to-final/chart') }}/' + flightId
-                }).done(function (data, textStatus, jqXHR) {
+                $.getJSON(
+                    '{{ url('approach/turn-to-final/chart') }}/' + flightId
+                ).done(function (data, textStatus, jqXHR) {
                     allData = data;
+
+                    // Clear all layers from the map and re-add the base Open
+                    // Street Maps (OSM) layer
+                    map.getLayers().clear();
+                    map.addLayer(osmSourceLayer);
+                    map.addLayer(vectorLayer);
 
                     // Reset our array of vector sources
                     vectorSources = allData.map(function (approach) {
@@ -327,8 +385,9 @@
                         }));
 
                     // Set the first approach as the map source by default
-                    $setSourceBtnsContainer.find('button[id^="set-source-"]')
-                        .first().click();
+                    $setSourceBtnsContainer.find('button[id^="set_source_"]')
+                        .first()
+                        .click();
                 }).fail(function (jqXHR, textStatus, errorThrown) {
                     console.error(errorThrown);
                 });
@@ -340,12 +399,56 @@
 
                 console.log(date, runwayId);
 
-                // $.ajax({
-                //     type: 'GET',
-                //     dataType: 'json',
-                //     url: '{{ url('approach/turn-to-final-chart') }}/' + runwayId + '/' + date,
-                //     data: {date: date, runwayId: runwayId}
-                // });
+                $.getJSON(
+                    '{{ url('approach/turn-to-final/chart-agg') }}/' + runwayId + '/' + date
+                ).done(function (data, textStatus, jqXHR) {
+                    var approaches = data;
+                    allData = [];
+                    vectorSources = [];
+
+                    // Clear all layers from the map and re-add the base Open
+                    // Street Maps (OSM) layer
+                    map.getLayers().clear();
+                    map.addLayer(osmSourceLayer);
+
+                    // Clear the Approach Source buttons since all the
+                    // approaches will be displayed at once
+                    $setSourceBtnsContainer.empty();
+
+                    var deferreds = approaches.map(function (a) {
+                        console.log(a.flight_id, a.approach_id);
+
+                        return $.getJSON(
+                            '{{ url('approach/turn-to-final/chart') }}/' + a.flight_id + '/' + a.approach_id
+                        ).done(function (data, textStatus, jqXHR) {
+                            allData.push(...data);
+
+                            data.forEach(function (approach) {
+                                var layer = createVectorLayer(
+                                    createVectorSource(approach)
+                                );
+
+                                map.addLayer(layer);
+                            });
+                        }).fail(function (jqXHR, textStatus, errorThrown) {
+                            console.error(errorThrown);
+                        });
+                    });
+
+                    $.when(...deferreds).then(
+                        function (x) {
+                            alert('Deffered done!');
+                        },
+                        function (y) {
+                            alert('Deffered fail!')
+                        },
+                        function (z) {
+                            alert('Deferred progress');
+                        }
+                    );
+                }).fail(function (jqXHR, textStatus, errorThrown) {
+                    console.log(errorThrown)
+                });
             });
         });
     </script>

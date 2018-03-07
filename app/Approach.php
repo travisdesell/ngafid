@@ -15,12 +15,12 @@ class Approach extends Eloquent
         'unstable' => 'boolean',
     ];
 
-    protected $appends = [
-        'isHeadingUnstable',
-        'isCrosstrackUnstable',
-        'isIasUnstable',
-        'isVsiUnstable',
-    ];
+    // protected $appends = [
+    //     'isHeadingUnstable',
+    //     'isCrosstrackUnstable',
+    //     'isIasUnstable',
+    //     'isVsiUnstable',
+    // ];
 
     public function scopeStable($query)
     {

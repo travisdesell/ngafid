@@ -64,8 +64,8 @@ Route::get('approach/selfdefined/chart', 'SelfDefinedApproach\SelfDefinedApproac
 Route::get('approach/selfdefined/flights', 'SelfDefinedApproach\SelfDefinedApproachController@flights');
 
 Route::get('approach/turn-to-final/{id?}', 'TurnToFinalController@index');
-Route::get('approach/turn-to-final/chart/{id}', 'TurnToFinalController@chart');
-Route::get('approach/turn-to-final/chart/{id}/{date}', 'TurnToFinalController@chartAgg');
+Route::get('approach/turn-to-final/chart/{flight_id}/{approach_id?}', 'TurnToFinalController@chart');
+Route::get('approach/turn-to-final/chart-agg/{runway_id}/{date}', 'TurnToFinalController@chartAgg');
 
 Route::get('dbx', 'DropboxAuthController@index');
 Route::post('dbx', 'DropboxAuthController@store');
