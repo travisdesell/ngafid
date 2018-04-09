@@ -14,10 +14,10 @@
 
 @setup
     $composer_home = '/var/www/html';
-    $repo = 'https://github.com/travisdesell/ngafid.git';
-    //$repo = 'git@github.com:travisdesell/ngafid.git';
+    $repo = 'git@github.com:travisdesell/ngafid.git';
     $release_dir = '/var/www/html/NGAFID_releases';
     $app_dir = '/var/www/html/NGAFID';
+    $shared_dir = '/var/www/html/NGAFID_shared';
     $release = 'release_' . date('YmdHis');
 @endsetup
 
@@ -26,6 +26,7 @@
     update_env_symlink
     run_composer
     update_logs_symlink
+    update_uploads_symlink
     update_permissions
     update_app_symlink
 @endmacro
@@ -60,7 +61,7 @@
 @task('update_env_symlink')
     # Symlink the global .env file to this release
     cd {{ $release_dir }}/{{ $release }};
-    ln -nfs ../../NGAFID.env .env;
+    ln -nfs {{ $shared_dir }}/.env .env;
     chgrp -h webprogs .env;
 @endtask
 
@@ -68,8 +69,16 @@
     # Persist log files across releases
     rm -r {{ $release_dir }}/{{ $release }}/storage/logs;
     cd {{ $release_dir }}/{{ $release }}/storage;
-    ln -nfs ../../../logs logs;
+    ln -nfs {{ $shared_dir }}/logs logs;
     chgrp -h webprogs logs;
+@endtask
+
+@task('update_uploads_symlink')
+    # Persist uploaded files across releases
+    rm -r {{ $release_dir }}/{{ $release }}/public/uploads;
+    cd {{ $release_dir }}/{{ $release }}/public/uploads;
+    ln -nfs {{ $shared_dir }}/uploads uploads;
+    chgrp -h webprogs uploads;
 @endtask
 
 @task('update_app_symlink')
