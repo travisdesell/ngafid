@@ -169,11 +169,11 @@
                                 window.open(
                                     "{{ url('approach/selfdefined/flights?') }}" +
                                     $.param({
-                                        runway: $('#runway :selected').html(),
-                                        date: $('#mthYr').val(),
-                                        gpa_low: e.point.x,
-                                        gpa_high: e.point.x + 0.5,
-                                        flight_id: e.point.ids
+                                        'runway': $('#runway :selected').html(),
+                                        'date': $('#mthYr').val(),
+                                        'gpa_low': e.point.x,
+                                        'gpa_high': e.point.x + 0.5,
+                                        'flight_id[]': e.point.ids
                                     }),
                                     ''
                                 ).focus();
