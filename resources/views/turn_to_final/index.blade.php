@@ -25,6 +25,49 @@
             background-image: linear-gradient(-180deg, #80d1f3 0%, #4a90e2 100%);
             box-shadow: 0 1px 2px 0 rgba(74, 144, 226, 0.44), 0 2px 8px 0 rgba(0, 0, 0, 0.14);
         }
+
+        .ol-popup {
+            position: absolute;
+            background-color: white;
+            -webkit-filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+            filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #cccccc;
+            bottom: 12px;
+            left: -50px;
+            min-width: 155px;
+        }
+        .ol-popup:after, .ol-popup:before {
+            top: 100%;
+            border: solid transparent;
+            content: " ";
+            height: 0;
+            width: 0;
+            position: absolute;
+            pointer-events: none;
+        }
+        .ol-popup:after {
+            border-top-color: white;
+            border-width: 10px;
+            left: 48px;
+            margin-left: -10px;
+        }
+        .ol-popup:before {
+            border-top-color: #cccccc;
+            border-width: 11px;
+            left: 48px;
+            margin-left: -11px;
+        }
+        .ol-popup-closer {
+            text-decoration: none;
+            position: absolute;
+            top: 2px;
+            right: 8px;
+        }
+        .ol-popup-closer:after {
+            content: "✖";
+        }
     </style>
 @endsection
 
@@ -88,6 +131,10 @@
                             <div id="set_source_btns" class="btn-group btn-group-justified" role="group"></div>
 
                             <div id="map" class="map"></div>
+                            <div id="popup" class="ol-popup">
+                                <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+                                <div id="popup-content"></div>
+                            </div>
 
                             <div class="btn-group btn-group-justified" role="group">
                                 <a href="" id="export" class="btn btn-default">
@@ -151,6 +198,8 @@
                         features.push(turf.lineString(
                             coordinates, {
                                 id: key,
+                                flightId: approach.flight_id,
+                                approachId: approach.approach_id,
                                 type: phases[key].type,
                                 severity: phases[key].severity
                             }
@@ -198,6 +247,10 @@
                 vectorLayer.setSource(vectorSources[idx]);
 
                 var runway = allData[idx].runway;
+                transitionMapViewTo(runway);
+            }
+
+            function transitionMapViewTo(runway) {
                 var touchdownPoint = turf.point([
                     runway.touchdown_lon,
                     runway.touchdown_lat
@@ -258,21 +311,21 @@
                         width: 2
                     })
                 }),
-                'aligned': new ol.style.Style({
+                0: new ol.style.Style({
                     stroke: new ol.style.Stroke({
                         color: '#6ac870',
                         width: 2
                     })
                 }),
-                'large': new ol.style.Style({
+                1: new ol.style.Style({
                     stroke: new ol.style.Stroke({
-                        color: '#be2f2b',
+                        color: '#e7eb2e',
                         width: 2
                     })
                 }),
-                'small': new ol.style.Style({
+                2: new ol.style.Style({
                     stroke: new ol.style.Stroke({
-                        color: '#be6f2b',
+                        color: '#be2f2b',
                         width: 2
                     })
                 }),
@@ -298,12 +351,33 @@
 
             var styleFunction = function (feature) {
                 var props = feature.getProperties();
-                if (props.id === 'turn') {
-                    if (props.type === 'aligned') return styles[props.type];
-                    else return styles[props.severity];
-                }
 
-                return styles[props.type || props.id];
+                return styles[props.severity || props.type || props.id];
+            };
+
+            var popup_container = document.getElementById('popup'),
+                popup_content = document.getElementById('popup-content'),
+                popup_closer = document.getElementById('popup-closer');
+
+            /**
+             * Create an overlay to anchor the popup to the map.
+             */
+            var overlay = new ol.Overlay({
+                element: popup_container,
+                autoPan: true,
+                autoPanAnimation: {
+                    duration: 250
+                }
+            });
+
+            /**
+             * Add a click handler to hide the popup.
+             * @return {boolean} Don't follow the href.
+             */
+            popup_closer.onclick  = function () {
+                overlay.setPosition(undefined);
+                popup_closer.blur();
+                return false;
             };
 
             var vectorLayer = new ol.layer.Vector({
@@ -327,9 +401,37 @@
                     osmSourceLayer,
                     vectorLayer
                 ],
-                target: 'map',
+                overlays: [overlay],
+                target: document.getElementById('map'),
                 loadTilesWhileAnimating: true,
                 view: mapView
+            });
+
+            // display popup on click
+            map.on('singleclick', function (evt) {
+                var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
+                    return feature;
+                });
+
+                if (feature && feature.get('id') !== 'extended_center_line') {
+                    var msg = 'Flight ID: <a href="{{ url('approach/flights?') }}' +
+                        $.param({'flight_id[]': feature.get('flightId')}) + '">' + feature.get('flightId') + '</a><br>' +
+                        'Approach ID: ' + feature.get('approachId');
+                    popup_content.innerHTML = msg;
+                    overlay.setPosition(evt.coordinate);
+                }
+            });
+
+            // change mouse cursor when over marker
+            map.on('pointermove', function (evt) {
+                if (evt.dragging) {
+                    overlay.setPosition(undefined);
+                    return;
+                }
+
+                var pixel = map.getEventPixel(evt.originalEvent);
+                var hit = map.hasFeatureAtPixel(pixel);
+                map.getTarget().style.cursor = hit ? 'pointer' : '';
             });
 
             $setSourceBtnsContainer.on('click', 'button[id^="set_source_"]', function () {
@@ -393,11 +495,13 @@
                 });
             });
 
+            var mapTransitionOccurred = false;
+
             $('#display_agg').click(function () {
                 var date = $('#month_year').val();
                 var runwayId = $('#runway').val();
 
-                console.log(date, runwayId);
+                mapTransitionOccurred = false;
 
                 $.getJSON(
                     '{{ url('approach/turn-to-final/chart-agg') }}/' + runwayId + '/' + date
@@ -430,6 +534,11 @@
 
                                 map.addLayer(layer);
                             });
+
+                            if (!mapTransitionOccurred) {
+                                transitionMapViewTo(allData[0].runway);
+                                mapTransitionOccurred = true;
+                            }
                         }).fail(function (jqXHR, textStatus, errorThrown) {
                             console.error(errorThrown);
                         });
@@ -437,13 +546,10 @@
 
                     $.when(...deferreds).then(
                         function (x) {
-                            alert('Deffered done!');
+                            alert('All approaches have been loaded successfully.');
                         },
                         function (y) {
-                            alert('Deffered fail!')
-                        },
-                        function (z) {
-                            alert('Deferred progress');
+                            alert('Some approaches failed to load.');
                         }
                     );
                 }).fail(function (jqXHR, textStatus, errorThrown) {
