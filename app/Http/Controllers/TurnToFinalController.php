@@ -31,6 +31,19 @@ class TurnToFinalController extends Controller
         ]);
     }
 
+    public function flights(Request $request) {
+        $flightIds = $request->get('flight_id');
+
+        $flights = FlightID::with('aircraft')
+            ->whereIn('id', $flightIds)
+            ->where('fleet_id', auth()->user()->org_id)
+            ->get();
+
+        return view('turn_to_final/flights', [
+            'data' => $flights,
+        ]);
+    }
+
     public function chart($flightId, $approachId = null)
     {
         $flight = FlightID::with([
@@ -39,8 +52,10 @@ class TurnToFinalController extends Controller
                     $query->where('approach_id', $approachId);
                 }
             },
-            'approaches.runway'
-        ])->findOrFail($flightId);
+            'approaches.runway',
+        ])->where('id', $flightId)
+            ->where('fleet_id', auth()->user()->org_id)
+            ->firstOrFail();
 
         $allData = $flight->approaches->map(function ($approach) use ($flight) {
             $data = $flight->mainTableData()
@@ -56,19 +71,21 @@ class TurnToFinalController extends Controller
                 0, $approach->turn_end - $approach->turn_start + 1
             );
             $approachData = $data->slice(
-                $approach->turn_end - $approach->turn_start,
+                $approach->approach_start - $approach->turn_start,
                 $approach->approach_end - $approach->approach_start + 1
             );
             $landingData = $data->slice(
-                $approach->approach_end - $approach->turn_start,
+                $approach->landing_start - $approach->turn_start,
                 $approach->landing_end - $approach->landing_start + 1
             );
             $runway = $approach->runway;
 
             return [
+                'flight_id' => $approach->flight_id,
+                'approach_id' => $approach->approach_id,
                 'phases' => [
                     'turn' => [
-                        'severity' => $approach->turn_error_severity,
+                        'severity' => $approach->turn_risk_level,
                         'type' => $approach->turn_error_type,
                         'coordinates' => $turnData,
                     ],
@@ -94,8 +111,10 @@ class TurnToFinalController extends Controller
         $toDate = $date->copy()->endOfMonth()->toDateString();
 
         $approaches = Approach::whereHas('flight', function ($query) use ($fromDate, $toDate) {
-            $query->whereBetween('date', [$fromDate, $toDate]);
+            $query->whereBetween('date', [$fromDate, $toDate])
+                ->where('fleet_id', auth()->user()->org_id);
         })->where('runway_id', $runwayId)
+            ->where('turn_risk_level', '>', 0)  // filter out the non-risky turns in the aggregate display
             ->get(['flight_id', 'approach_id']);
 
         return response()->json($approaches);
