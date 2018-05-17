@@ -76,7 +76,7 @@
 @task('update_uploads_symlink')
     # Persist uploaded files across releases
     rm -r {{ $release_dir }}/{{ $release }}/public/uploads;
-    cd {{ $release_dir }}/{{ $release }}/public/uploads;
+    cd {{ $release_dir }}/{{ $release }}/public;
     ln -nfs {{ $shared_dir }}/uploads uploads;
     chgrp -h webprogs uploads;
 @endtask
