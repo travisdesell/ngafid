@@ -119,48 +119,4 @@ class TurnToFinalController extends Controller
 
         return response()->json($approaches);
     }
-
-    public function chartAgg2($runwayId, $date)
-    {
-        $date = new Carbon($date);
-        $fromDate = $date->toDateString();
-        $toDate = $date->copy()->endOfMonth()->toDateString();
-        $runway = TestRunway::with(['approaches' => function ($query) use ($fromDate, $toDate) {
-            $query->whereHas('flight', function ($query) use ($fromDate, $toDate) {
-                $query->whereBetween('date', [$fromDate, $toDate]);
-            });
-        }, 'approaches.flight'])->findOrFail($runwayId);
-
-        $approaches = $runway->approaches;
-
-        $allData = [];
-        $allData = $approaches->map(function ($approach) use ($runway) {
-            $data = $approach->flight->mainTableData()
-                ->select(['longitude', 'latitude'])
-                ->offset($approach->approach_start)
-                ->take($approach->landing_end - $approach->approach_start + 1)
-                ->get()
-                ->map(function ($point) {
-                    return [$point->longitude, $point->latitude];
-                });
-
-            $approachData = $data->slice(
-                0, $approach->approach_end - $approach->approach_start + 1
-            );
-            $landingData = $data->slice(
-                $approach->approach_end - $approach->approach_start,
-                $approach->landing_end - $approach->landing_start + 1
-            );
-
-            return [
-                'approach' => $approachData,
-                'landing' => $landingData,
-                'takeoff' => [],
-                'class' => $approach->landing_type,
-                'runway' => $runway,
-            ];
-        });
-
-        return response()->json($allData);
-    }
 }

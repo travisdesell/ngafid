@@ -15,13 +15,6 @@ class Approach extends Eloquent
         'unstable' => 'boolean',
     ];
 
-    // protected $appends = [
-    //     'isHeadingUnstable',
-    //     'isCrosstrackUnstable',
-    //     'isIasUnstable',
-    //     'isVsiUnstable',
-    // ];
-
     public function scopeStable($query)
     {
         return $query->where('unstable', '=', 0);
@@ -45,25 +38,5 @@ class Approach extends Eloquent
     public function runway()
     {
         return $this->belongsTo('NGAFID\TestRunway', 'runway_id', 'id');
-    }
-
-    public function isHeadingUnstable()
-    {
-        return $this->unstable && $this->f1_heading !== null;
-    }
-
-    public function isCrosstrackUnstable()
-    {
-        return $this->unstable && $this->f2_crosstrack !== null;
-    }
-
-    public function isIasUnstable()
-    {
-        return $this->unstable && $this->a_ias !== null;
-    }
-
-    public function isVsiUnstable()
-    {
-        return $this->unstable && $this->s_vsi !== null;
     }
 }
