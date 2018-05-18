@@ -1,4 +1,4 @@
-<!-- resources/views/selfDefinedApproach/flights.blade.php -->
+<!-- resources/views/turn_to_final/flights.blade.php -->
 
 @extends('NGAFID-master')
 

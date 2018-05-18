@@ -1,3 +1,5 @@
+<!-- resources/views/turn_to_final/index.blade.php -->
+
 @extends('NGAFID-master')
 
 @section('cssScripts')
