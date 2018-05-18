@@ -113,10 +113,10 @@
             <li>
                 <a href="{{ url('approach/analysis') }}">Stabilized Approach</a>
             </li>
-            <li>
-                <a href="{{ url('approach/turn-to-final') }}">Turn To Final</a>
-            </li>
         @endif
+        <li>
+            <a href="{{ url('approach/turn-to-final') }}">Turn To Final</a>
+        </li>
         <li>
             <a href="{{ url('approach/selfdefined') }}">Self Defined</a>
         </li>
